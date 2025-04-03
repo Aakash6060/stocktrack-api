@@ -22,15 +22,16 @@
   },
   "homepage": "https://github.com/Aakash6060/stocktrack-api#readme",
   "dependencies": {
-    "express": "^5.1.0",
+    "cors": "^2.8.5",
     "dotenv": "^16.4.7",
+    "express": "^5.1.0",
     "firebase-admin": "^13.2.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
+    "@types/dotenv": "^6.1.1",
     "@types/express": "^5.0.1",
     "@types/node": "^22.14.0",
-    "@types/dotenv": "^6.1.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.2"
   }
