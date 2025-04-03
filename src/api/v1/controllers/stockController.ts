@@ -22,3 +22,62 @@ export const getStockData = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Failed to fetch stock data" });
   }
 };
+
+/**
+ * GET /api/v1/stocks/:symbol/history
+ * @desc Return mock stock history data for a given symbol
+ * @note Replace mock data with real stock history API integration in Milestone 2
+ */
+export const getStockHistory = async (req: Request, res: Response) => {
+  const { symbol } = req.params;
+
+  try {
+    // Mock historical data for the stock symbol
+    const mockHistory = [
+      { date: "2025-04-01", price: 145.50 },
+      { date: "2025-04-02", price: 146.20 },
+      { date: "2025-04-03", price: 144.80 },
+    ];
+
+    res.status(200).json({
+      symbol: symbol.toUpperCase(),
+      history: mockHistory,
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch stock history" });
+  }
+};
+
+/**
+ * GET /api/v1/stocks/:symbol/news
+ * @desc Fetch mock news articles for a given symbol
+ * @note Replace mock data with real stock news API integration in Milestone 2
+ */
+export const getStockNews = async (req: Request, res: Response) => {
+  const { symbol } = req.params;
+
+  try {
+    // Mock news articles for the stock symbol
+    const mockNews = [
+      {
+        title: "Apple announces new iPhone",
+        source: "TechCrunch",
+        url: "https://techcrunch.com/apple-new-iphone",
+        date: "2025-04-03",
+      },
+      {
+        title: "Apple stock surges after strong earnings",
+        source: "CNBC",
+        url: "https://cnbc.com/apple-stock-surges",
+        date: "2025-04-02",
+      },
+    ];
+
+    res.status(200).json({
+      symbol: symbol.toUpperCase(),
+      news: mockNews,
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch stock news" });
+  }
+};
