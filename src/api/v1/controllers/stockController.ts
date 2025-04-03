@@ -10,10 +10,10 @@ export const getStockData = async (req: Request, res: Response) => {
 
   try {
     // TODO: Replace with real-time stock API integration (e.g., Finnhub or Alpha Vantage)
-    const mockPrice = 150.25;
+    const mockPrice = +(100 + Math.random() * 100).toFixed(2);
 
     res.status(200).json({
-      symbol,
+      symbol: symbol.toUpperCase(),
       price: mockPrice,
       currency: "USD",
       timestamp: new Date().toISOString(),
