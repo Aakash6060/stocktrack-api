@@ -1,18 +1,12 @@
 import { Request, Response } from "express";
-import { db } from "../../../config/firebase";
+import admin from "../../../config/firebase"; 
 
-export const addStockToPortfolio = async (req: Request, res: Response): Promise<void>  => {
+export const addStockToPortfolio = async (req: Request, res: Response) => {
   const { symbol, quantity, averageBuyPrice } = req.body;
-  const userId = req.user?.uid; 
-
-  // Check if userId is available, meaning user is authenticated
-  if (!userId) {
-    res.status(401).json({ error: "User not authenticated" });
-    return;  }
 
   try {
-    // Add stock to the user's portfolio in Firestore
-    await db.collection("portfolios").doc(userId).collection("stocks").add({
+    const db = admin.firestore();
+    await db.collection("portfolios").add({
       symbol,
       quantity,
       averageBuyPrice,

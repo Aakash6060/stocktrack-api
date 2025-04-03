@@ -1,5 +1,5 @@
-import admin from "firebase-admin";
-import * as dotenv from "dotenv";
+import * as dotenv from 'dotenv';
+import admin from 'firebase-admin';
 
 dotenv.config();
 

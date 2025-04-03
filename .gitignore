@@ -4,3 +4,4 @@ dist/
 
 # Sensitive Firebase credentials
 serviceAccountKey.json
+.env
