@@ -1,9 +1,37 @@
 {
+  "name": "aakash_0405969_stocktrack-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "ts-node src/server.ts",
+    "dev": "nodemon src/server.ts",
+    "build": "tsc",
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Aakash6060/stocktrack-api.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Aakash6060/stocktrack-api/issues"
+  },
+  "homepage": "https://github.com/Aakash6060/stocktrack-api#readme",
   "dependencies": {
+    "express": "^5.1.0",
     "dotenv": "^16.4.7",
     "firebase-admin": "^13.2.0"
   },
   "devDependencies": {
-    "@types/dotenv": "^6.1.1"
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.1",
+    "@types/node": "^22.14.0",
+    "@types/dotenv": "^6.1.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.2"
   }
 }
