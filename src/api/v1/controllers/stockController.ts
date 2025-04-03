@@ -1,15 +1,16 @@
 import { Request, Response } from "express";
 
 /**
- * GET /api/v1/stocks/:symbol
- * @desc Return mock stock data for a given symbol
- * @note Replace mock data with real stock API integration in Milestone 2
+ * @route GET /api/v1/stocks/:symbol
+ * @description Returns mock stock data for a given symbol.
+ * @param req.params.symbol - Stock ticker symbol (e.g., AAPL, GOOGL)
+ * @returns JSON object with current stock price and metadata.
+ * @note This is a placeholder. Replace with a real-time stock API (e.g., Finnhub, Alpha Vantage) in Milestone 2.
  */
 export const getStockData = async (req: Request, res: Response) => {
   const { symbol } = req.params;
 
   try {
-    // TODO: Replace with real-time stock API integration (e.g., Finnhub or Alpha Vantage)
     const mockPrice = +(100 + Math.random() * 100).toFixed(2);
 
     res.status(200).json({
@@ -24,15 +25,16 @@ export const getStockData = async (req: Request, res: Response) => {
 };
 
 /**
- * GET /api/v1/stocks/:symbol/history
- * @desc Return mock stock history data for a given symbol
- * @note Replace mock data with real stock history API integration in Milestone 2
+ * @route GET /api/v1/stocks/:symbol/history
+ * @description Returns mock historical price data for the given stock symbol.
+ * @param req.params.symbol - Stock ticker symbol.
+ * @returns JSON object containing date-wise stock price history.
+ * @note Replace with real historical data API integration in Milestone 2.
  */
 export const getStockHistory = async (req: Request, res: Response) => {
   const { symbol } = req.params;
 
   try {
-    // Manually throw error for testing error handling
     if (symbol === 'error') {
       throw new Error("Simulated error");
     }
@@ -52,11 +54,17 @@ export const getStockHistory = async (req: Request, res: Response) => {
   }
 };
 
+/**
+ * @route GET /api/v1/stocks/:symbol/news
+ * @description Returns mock financial news related to a given stock symbol.
+ * @param req.params.symbol - Stock ticker symbol.
+ * @returns JSON object containing a list of recent news articles.
+ * @note Replace with integration from a financial news API (e.g., NewsAPI, Finnhub) in Milestone 2.
+ */
 export const getStockNews = async (req: Request, res: Response) => {
   const { symbol } = req.params;
 
   try {
-    // Manually throw error for testing error handling
     if (symbol === 'error') {
       throw new Error("Simulated error");
     }

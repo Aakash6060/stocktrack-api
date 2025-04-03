@@ -1,20 +1,38 @@
-import { registerUser,  loginUser } from "../src/api/v1/controllers/authController";
+/**
+ * @fileoverview Unit tests for Auth Controller - registerUser and loginUser.
+ * Uses Jest to test Firebase and Axios integration.
+ */
+
+import { registerUser, loginUser } from "../src/api/v1/controllers/authController";
 import admin from "../src/config/firebase";
 import axios from "axios";
 import { Request, Response } from "express";
 
-// Mock Firebase Admin SDK
+// --- Mock Setup ---
+
+/**
+ * Mock Firebase Admin SDK's auth module.
+ */
 jest.mock("../src/config/firebase", () => ({
   auth: jest.fn().mockReturnValue({
     createUser: jest.fn(),
   }),
 }));
 
-// Mock Axios
+/**
+ * Mock Axios for login requests.
+ */
 jest.mock("axios");
 
+// --- Test Suite ---
+
 describe("Auth Controller", () => {
+  // --- registerUser Tests ---
   describe("registerUser", () => {
+    /**
+     * Test case: Should register a user successfully.
+     * Mocks Firebase `createUser` and simulates a successful registration.
+     */
     it("should register a user successfully", async () => {
       const req = {
         body: {
@@ -43,6 +61,10 @@ describe("Auth Controller", () => {
       });
     });
 
+    /**
+     * Test case: Should handle error when registration fails.
+     * Mocks Firebase `createUser` to reject and verifies proper error handling.
+     */
     it("should handle error when registration fails", async () => {
       const req = {
         body: {
@@ -69,7 +91,12 @@ describe("Auth Controller", () => {
     });
   });
 
+  // --- loginUser Tests ---
   describe("loginUser", () => {
+    /**
+     * Test case: Should log in a user successfully.
+     * Mocks Axios POST request to Firebase Identity Toolkit and simulates success.
+     */
     it("should log in a user successfully", async () => {
       const req = {
         body: {
@@ -98,6 +125,10 @@ describe("Auth Controller", () => {
       });
     });
 
+    /**
+     * Test case: Should handle invalid credentials.
+     * Mocks Axios POST to simulate login failure due to incorrect credentials.
+     */
     it("should handle invalid credentials", async () => {
       const req = {
         body: {

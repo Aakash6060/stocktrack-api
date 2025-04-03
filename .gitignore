@@ -1,7 +1,14 @@
+# Ignore Node.js dependencies
 node_modules/
+
+# Ignore compiled TypeScript output
 dist/
+
+# Ignore VS Code project settings
 .vscode/
 
-# Sensitive Firebase credentials
+# Ignore Firebase service account credentials (DO NOT COMMIT THIS FILE)
 serviceAccountKey.json
+
+# Ignore environment variables
 .env
