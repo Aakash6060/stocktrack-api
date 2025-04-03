@@ -9,18 +9,18 @@ const router = Router();
  *   get:
  *     tags:
  *       - Stock
- *     description: Get real-time stock data for a given stock symbol
+ *     description: Get mock stock data for a given stock symbol (to be replaced with real-time data in future milestones)
  *     parameters:
  *       - in: path
  *         name: symbol
  *         required: true
- *         description: The stock symbol (e.g., AAPL, TSLA)
+ *         description: The stock symbol (e.g., AAPL, TSLA) for which stock data is requested
  *         schema:
  *           type: string
  *           example: "AAPL"
  *     responses:
  *       200:
- *         description: Successfully retrieved stock data
+ *         description: Successfully retrieved mock stock data (to be replaced with real stock data in Milestone 2)
  *         content:
  *           application/json:
  *             schema:
@@ -41,7 +41,7 @@ const router = Router();
  *                   format: date-time
  *                   example: "2025-04-03T10:00:00Z"
  *       500:
- *         description: Failed to fetch stock data
+ *         description: Failed to fetch stock data (mock or real-time integration error)
  *         content:
  *           application/json:
  *             schema:

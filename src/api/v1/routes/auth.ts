@@ -54,8 +54,15 @@ const router = Router();
  *                   example: "Registration failed"
  *                 error:
  *                   type: object
- *                   description: Error details
+ *                   properties:
+ *                     code:
+ *                       type: string
+ *                       example: "auth/email-already-exists"
+ *                     message:
+ *                       type: string
+ *                       example: "The email address is already in use by another account."
  */
+
 router.post("/register", registerUser);
 
 /**
@@ -64,7 +71,7 @@ router.post("/register", registerUser);
  *   post:
  *     tags:
  *       - Auth
- *     description: Login an existing user
+ *     description: Login an existing user and return authentication tokens
  *     parameters:
  *       - in: body
  *         name: credentials
@@ -84,7 +91,7 @@ router.post("/register", registerUser);
  *               example: "password123"
  *     responses:
  *       200:
- *         description: Successful login, returns the auth token
+ *         description: Successful login, returns the auth token and refresh token
  *         content:
  *           application/json:
  *             schema:
@@ -92,12 +99,12 @@ router.post("/register", registerUser);
  *               properties:
  *                 idToken:
  *                   type: string
- *                   description: Firebase authentication token
+ *                   description: Firebase authentication token used for authorizing API requests
  *                 refreshToken:
  *                   type: string
- *                   description: Firebase refresh token
+ *                   description: Firebase refresh token used for obtaining new `idToken` when it expires
  *       401:
- *         description: Invalid credentials
+ *         description: Invalid credentials (e.g., incorrect email/password)
  *         content:
  *           application/json:
  *             schema:
