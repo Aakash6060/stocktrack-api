@@ -12,3 +12,6 @@ serviceAccountKey.json
 
 # Ignore environment variables
 .env
+
+# Postaman Collection
+StockTrack API.postman_collection.json
