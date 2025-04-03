@@ -32,7 +32,11 @@ export const getStockHistory = async (req: Request, res: Response) => {
   const { symbol } = req.params;
 
   try {
-    // Mock historical data for the stock symbol
+    // Manually throw error for testing error handling
+    if (symbol === 'error') {
+      throw new Error("Simulated error");
+    }
+
     const mockHistory = [
       { date: "2025-04-01", price: 145.50 },
       { date: "2025-04-02", price: 146.20 },
@@ -48,16 +52,15 @@ export const getStockHistory = async (req: Request, res: Response) => {
   }
 };
 
-/**
- * GET /api/v1/stocks/:symbol/news
- * @desc Fetch mock news articles for a given symbol
- * @note Replace mock data with real stock news API integration in Milestone 2
- */
 export const getStockNews = async (req: Request, res: Response) => {
   const { symbol } = req.params;
 
   try {
-    // Mock news articles for the stock symbol
+    // Manually throw error for testing error handling
+    if (symbol === 'error') {
+      throw new Error("Simulated error");
+    }
+
     const mockNews = [
       {
         title: "Apple announces new iPhone",
