@@ -1,3 +1,17 @@
+# Ignore Node.js dependencies
 node_modules/
+
+# Ignore compiled TypeScript output
 dist/
+
+# Ignore VS Code project settings
 .vscode/
+
+# Ignore Firebase service account credentials (DO NOT COMMIT THIS FILE)
+serviceAccountKey.json
+
+# Ignore environment variables
+.env
+
+# Postaman Collection
+StockTrack API.postman_collection.json

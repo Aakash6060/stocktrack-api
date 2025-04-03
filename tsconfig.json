@@ -6,6 +6,7 @@
         "esModuleInterop": true,
         "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true,
+        "rootDir": "./",
         "outDir": "./dist",
         "resolveJsonModule": true,
         "noImplicitAny": true,
@@ -19,6 +20,6 @@
             "*": ["*"]
         }
     },
-    "include": ["src/**/*", "test/**/*", "config/**/*"],
+    "include": ["src/**/*", "test/**/*", "config/**/*", "src/api/v1/types/**/*"],
     "exclude": ["node_modules", "dist"]
 }
