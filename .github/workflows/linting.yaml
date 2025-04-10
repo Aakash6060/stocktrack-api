@@ -1,11 +1,12 @@
 name: TypeScript Lint and Reviewdog
 on:
-    pull_request_target:
-        branches:
-            - main
-    push:
-        branches:
-            - main
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
       
 permissions:
   pull-requests: write
