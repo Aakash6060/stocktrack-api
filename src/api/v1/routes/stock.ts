@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { getStockData, getStockHistory, getStockNews } from "../controllers/stockController";
 
-const router = Router();
+const router: Router = Router();
 
 /**
  * @swagger

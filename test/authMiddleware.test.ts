@@ -6,6 +6,8 @@
 import { verifyRole } from "../src/middleware/auth";
 import admin from "../src/config/firebase";
 import { Request, Response, NextFunction } from "express";
+import request from "supertest";
+import express from "express";
 
 // --- Mock Setup ---
 
@@ -73,5 +75,57 @@ describe("Auth Middleware", () => {
       expect(res.status).toHaveBeenCalledWith(403);
       expect(res.json).toHaveBeenCalledWith({ error: "Forbidden" });
     });
+  });
+});
+
+describe("Auth Middleware (Integration Tests)", () => {
+  const app = express();
+  app.use(express.json());
+
+  // Protected test route
+  app.get("/test-protected", verifyRole(["admin"]), (req: Request, res: Response) => {
+    res.status(200).json({ message: "Access granted" });
+  });
+
+  it("should return 200 if token is valid and role is allowed", async () => {
+    const mockVerifyIdToken = admin.auth().verifyIdToken as jest.Mock;
+    mockVerifyIdToken.mockResolvedValue({ role: "admin" });
+
+    const res = await request(app)
+      .get("/test-protected")
+      .set("Authorization", "Bearer valid-token");
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ message: "Access granted" });
+  });
+
+  it("should return 403 if role is not allowed", async () => {
+    const mockVerifyIdToken = admin.auth().verifyIdToken as jest.Mock;
+    mockVerifyIdToken.mockResolvedValue({ role: "guest" });
+
+    const res = await request(app)
+      .get("/test-protected")
+      .set("Authorization", "Bearer valid-token");
+
+    expect(res.status).toBe(403);
+    expect(res.body).toEqual({ error: "Forbidden" });
+  });
+
+  it("should return 401 if token is missing", async () => {
+    const res = await request(app).get("/test-protected");
+    expect(res.status).toBe(401);
+    expect(res.body).toEqual({ error: "Missing token" });
+  });
+
+  it("should return 401 if token is invalid", async () => {
+    const mockVerifyIdToken = admin.auth().verifyIdToken as jest.Mock;
+    mockVerifyIdToken.mockRejectedValue(new Error("Invalid token"));
+
+    const res = await request(app)
+      .get("/test-protected")
+      .set("Authorization", "Bearer invalid-token");
+
+    expect(res.status).toBe(401);
+    expect(res.body).toEqual({ error: "Invalid token" });
   });
 });

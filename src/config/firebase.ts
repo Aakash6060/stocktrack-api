@@ -7,6 +7,9 @@
 
 import * as dotenv from 'dotenv';
 import admin from 'firebase-admin';
+import { ServiceAccount } from 'firebase-admin';
+import { Firestore } from 'firebase-admin/firestore';
+import fs from 'fs';
 
 // Load environment variables from .env file
 dotenv.config();
@@ -18,15 +21,38 @@ dotenv.config();
  * `FIREBASE_SERVICE_ACCOUNT_KEY` or from a local file `serviceAccountKey.json`
  * as a fallback (useful during development).
  */
-const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT_KEY
-  ? JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY)
-  : require("../../serviceAccountKey.json");
+let serviceAccount: ServiceAccount;
+
+if (process.env.FIREBASE_SERVICE_ACCOUNT_KEY) {
+  try {
+    const parsed: unknown = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
+    if (typeof parsed === 'object' && parsed !== null) {
+      serviceAccount = parsed as ServiceAccount;
+    } else {
+      throw new Error('Invalid FIREBASE_SERVICE_ACCOUNT_KEY format.');
+    }
+  } catch (error: unknown) {
+    const message: string =
+      error instanceof Error ? error.message : String(error);
+    throw new Error('Failed to parse FIREBASE_SERVICE_ACCOUNT_KEY: ' + message);
+  }
+} else {
+  const path: string = require.resolve('../../serviceAccountKey.json');
+  const rawKey: string = fs.readFileSync(path, 'utf-8');
+  const parsedKey: unknown = JSON.parse(rawKey);
+
+  if (typeof parsedKey === 'object' && parsedKey !== null) {
+    serviceAccount = parsedKey as ServiceAccount;
+  } else {
+    throw new Error('Invalid format in serviceAccountKey.json');
+  }
+}
 
 /**
  * Initialize Firebase Admin SDK using the provided credentials.
  */
 admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
+  credential: admin.credential.cert(serviceAccount),
 });
 
 /**
@@ -34,7 +60,7 @@ admin.initializeApp({
  * 
  * Exported for use throughout the application.
  */
-export const db = admin.firestore();
+export const db: Firestore = admin.firestore();
 
 /**
  * Export the initialized admin instance to allow access 

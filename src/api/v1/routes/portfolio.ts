@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { addStockToPortfolio } from "../controllers/portfolioController";
 
-const router = Router();
+const router: Router = Router();
 
 /**
  * @swagger

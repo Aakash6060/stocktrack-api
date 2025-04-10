@@ -7,11 +7,11 @@ import { Request, Response } from "express";
  * @returns JSON object with current stock price and metadata.
  * @note This is a placeholder. Replace with a real-time stock API (e.g., Finnhub, Alpha Vantage) in Milestone 2.
  */
-export const getStockData = async (req: Request, res: Response) => {
+export const getStockData = (req: Request<{ symbol: string }>, res: Response): void => {
   const { symbol } = req.params;
 
   try {
-    const mockPrice = +(100 + Math.random() * 100).toFixed(2);
+    const mockPrice: number = +(100 + Math.random() * 100).toFixed(2);
 
     res.status(200).json({
       symbol: symbol.toUpperCase(),
@@ -19,7 +19,7 @@ export const getStockData = async (req: Request, res: Response) => {
       currency: "USD",
       timestamp: new Date().toISOString(),
     });
-  } catch (error) {
+  } catch {
     res.status(500).json({ error: "Failed to fetch stock data" });
   }
 };
@@ -31,7 +31,7 @@ export const getStockData = async (req: Request, res: Response) => {
  * @returns JSON object containing date-wise stock price history.
  * @note Replace with real historical data API integration in Milestone 2.
  */
-export const getStockHistory = async (req: Request, res: Response) => {
+export const getStockHistory = (req: Request<{ symbol: string }>, res: Response): void => {
   const { symbol } = req.params;
 
   try {
@@ -39,7 +39,7 @@ export const getStockHistory = async (req: Request, res: Response) => {
       throw new Error("Simulated error");
     }
 
-    const mockHistory = [
+    const mockHistory: { date: string, price: number }[] = [
       { date: "2025-04-01", price: 145.50 },
       { date: "2025-04-02", price: 146.20 },
       { date: "2025-04-03", price: 144.80 },
@@ -49,7 +49,7 @@ export const getStockHistory = async (req: Request, res: Response) => {
       symbol: symbol.toUpperCase(),
       history: mockHistory,
     });
-  } catch (error) {
+  } catch {
     res.status(500).json({ error: "Failed to fetch stock history" });
   }
 };
@@ -61,7 +61,7 @@ export const getStockHistory = async (req: Request, res: Response) => {
  * @returns JSON object containing a list of recent news articles.
  * @note Replace with integration from a financial news API (e.g., NewsAPI, Finnhub) in Milestone 2.
  */
-export const getStockNews = async (req: Request, res: Response) => {
+export const getStockNews = (req: Request<{ symbol: string }>, res: Response): void => {
   const { symbol } = req.params;
 
   try {
@@ -69,7 +69,7 @@ export const getStockNews = async (req: Request, res: Response) => {
       throw new Error("Simulated error");
     }
 
-    const mockNews = [
+    const mockNews: { title: string, source: string, url: string, date: string }[] = [
       {
         title: "Apple announces new iPhone",
         source: "TechCrunch",
@@ -88,7 +88,7 @@ export const getStockNews = async (req: Request, res: Response) => {
       symbol: symbol.toUpperCase(),
       news: mockNews,
     });
-  } catch (error) {
+  } catch {
     res.status(500).json({ error: "Failed to fetch stock news" });
   }
 };

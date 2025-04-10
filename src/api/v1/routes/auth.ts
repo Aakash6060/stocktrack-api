@@ -2,7 +2,7 @@ import { Router } from "express";
 import { registerUser } from "../controllers/authController";
 import { loginUser } from "../controllers/authController";
 
-const router = Router();
+const router: Router = Router();
 
 /**
  * @swagger
@@ -115,5 +115,4 @@ router.post("/register", registerUser);
  *                   example: "Invalid credentials"
  */
 router.post("/login", loginUser);
-
 export default router;

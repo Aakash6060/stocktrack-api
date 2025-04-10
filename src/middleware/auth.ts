@@ -20,24 +20,24 @@ export const verifyRole = (allowedRoles: string[]) => async (
   res: Response,
   next: NextFunction
 ): Promise<void> => {
-  const token = req.headers.authorization?.split("Bearer ")[1];
+  const token: string | undefined = req.headers.authorization?.split("Bearer ")[1];
   if (!token) {
     res.status(401).json({ error: "Missing token" });
     return;
   }
 
   try {
-    const decoded = await admin.auth().verifyIdToken(token);
+    const decoded: admin.auth.DecodedIdToken = await admin.auth().verifyIdToken(token);
 
-    if (!allowedRoles.includes(decoded.role)) {
+    const userRole: string | undefined = decoded.role as string | undefined;
+    if (!userRole || !allowedRoles.includes(userRole)) {
       res.status(403).json({ error: "Forbidden" });
       return;
     }
 
-    // Attach decoded user info to request object for later use
     req.user = decoded;
     next();
-  } catch (err) {
+  } catch {
     res.status(401).json({ error: "Invalid token" });
   }
 };
