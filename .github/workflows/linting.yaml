@@ -1,11 +1,12 @@
 name: TypeScript Lint and Reviewdog
 on:
-    pull_request_target:
-        branches:
-            - main
-    push:
-        branches:
-            - main
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
       
 permissions:
   pull-requests: write
@@ -17,6 +18,10 @@ jobs:
             # Step 1: Checkout the code
             - name: Checkout code
               uses: actions/checkout@v3
+              with:
+                repository: Aakash6060/stocktrack-api
+                token: ${{ secrets.GITHUB_TOKEN }}
+
 
             # Step 2: Setup Node.js
             - name: Setup Node.js
@@ -38,3 +43,4 @@ jobs:
                   level: error
               env:
                   REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
