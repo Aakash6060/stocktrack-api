@@ -73,7 +73,7 @@ describe("Auth Middleware", () => {
       await middleware(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(403);
-      expect(res.json).toHaveBeenCalledWith({ error: "Forbidden" });
+      expect(res.json).toHaveBeenCalledWith({ error: "Forbidden: insufficient role" });
     });
   });
 });
@@ -108,7 +108,7 @@ describe("Auth Middleware (Integration Tests)", () => {
       .set("Authorization", "Bearer valid-token");
 
     expect(res.status).toBe(403);
-    expect(res.body).toEqual({ error: "Forbidden" });
+    expect(res.body).toEqual({ error: "Forbidden: insufficient role" });
   });
 
   it("should return 401 if token is missing", async () => {

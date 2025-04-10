@@ -74,3 +74,85 @@ export const loginUser = async (
     }
   }
 };
+
+/**
+ * Sets a custom role for a user using Firebase Admin SDK.
+ *
+ * @route POST /auth/set-role
+ * @param req - Express request object containing `uid` and `role`
+ * @param res - Express response object
+ */
+export const setUserRole = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const { uid, role } = req.body;
+  try {
+    await admin.auth().setCustomUserClaims(uid, { role });
+    res.status(200).json({ message: `Role '${role}' set for user ${uid}` });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      res.status(500).json({ message: "Failed to set user role", error: error.message });
+    } else {
+      res.status(500).json({ message: "Failed to set user role", error: "Unknown error" });
+    }
+  }
+};
+
+/**
+ * Retrieves a list of all users. Can be filtered by role if needed.
+ *
+ * @route GET /users
+ * @param req - Express request object
+ * @param res - Express response object
+ */
+export const listUsers = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const listUsersResult = await admin.auth().listUsers();
+    const users = listUsersResult.users.map((user) => ({
+      uid: user.uid,
+      email: user.email,
+      displayName: user.displayName,
+      customClaims: user.customClaims || {},
+    }));
+    res.status(200).json({ users });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      res.status(500).json({ message: "Failed to list users", error: error.message });
+    } else {
+      res.status(500).json({ message: "Failed to list users", error: "Unknown error" });
+    }
+  }
+};
+
+/**
+ * Retrieves a user by ID (Admin or owner only).
+ *
+ * @route GET /users/:id
+ * @param req - Express request object containing user ID
+ * @param res - Express response object
+ */
+export const getUserById = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const { id } = req.params;
+  try {
+    const user = await admin.auth().getUser(id);
+    res.status(200).json({
+      uid: user.uid,
+      email: user.email,
+      displayName: user.displayName,
+      customClaims: user.customClaims || {},
+    });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      res.status(404).json({ message: "User not found", error: error.message });
+    } else {
+      res.status(404).json({ message: "User not found", error: "Unknown error" });
+    }
+  }
+};

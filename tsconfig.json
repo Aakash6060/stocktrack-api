@@ -1,25 +1,27 @@
 {
     "compilerOptions": {
-        "target": "ES6",
-        "module": "commonjs",
-        "strict": true,
-        "esModuleInterop": true,
-        "skipLibCheck": true,
-        "forceConsistentCasingInFileNames": true,
-        "rootDir": "./",
-        "outDir": "./dist",
-        "resolveJsonModule": true,
-        "noImplicitAny": true,
-        "strictNullChecks": true,
-        "strictFunctionTypes": true,
-        "strictPropertyInitialization": true,
-        "noImplicitThis": true,
-        "alwaysStrict": true,
-        "baseUrl": "./",
-        "paths": {
-            "*": ["*"]
-        }
+      "target": "ES6",
+      "module": "commonjs",
+      "strict": true,
+      "esModuleInterop": true,
+      "skipLibCheck": true,
+      "forceConsistentCasingInFileNames": true,
+      "rootDir": "./",
+      "outDir": "./dist",
+      "resolveJsonModule": true,
+      "noImplicitAny": true,
+      "strictNullChecks": true,
+      "strictFunctionTypes": true,
+      "strictPropertyInitialization": true,
+      "noImplicitThis": true,
+      "alwaysStrict": true,
+      "baseUrl": "./",
+      "paths": {
+        "types/*": ["src/types/*"],  // Ensure custom types are resolved correctly
+        "*": ["node_modules/*"]      // Keep resolving modules from node_modules
+      }
     },
     "include": ["src/**/*", "test/**/*", "config/**/*", "src/api/v1/types/**/*"],
     "exclude": ["node_modules", "dist"]
-}
+  }
+  
