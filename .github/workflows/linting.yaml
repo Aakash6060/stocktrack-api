@@ -3,6 +3,10 @@ on:
     pull_request_target:
         branches:
             - main
+    push:
+        branches:
+            - main
+      
 permissions:
   pull-requests: write
 
