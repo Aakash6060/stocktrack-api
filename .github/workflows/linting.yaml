@@ -18,6 +18,10 @@ jobs:
             # Step 1: Checkout the code
             - name: Checkout code
               uses: actions/checkout@v3
+              with:
+                repository: Aakash6060/stocktrack-api
+                token: ${{ secrets.GITHUB_TOKEN }}
+
 
             # Step 2: Setup Node.js
             - name: Setup Node.js
