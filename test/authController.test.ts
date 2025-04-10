@@ -3,12 +3,13 @@
  * Uses Jest to test Firebase and Axios integration.
  */
 
-import { registerUser, loginUser } from "../src/api/v1/controllers/authController";
+import { registerUser, loginUser, setUserRole, listUsers, getUserById } from "../src/api/v1/controllers/authController";
 import admin from "../src/config/firebase";
 import axios from "axios";
 import request from "supertest";
 import app from "../src/app";
 import { Request, Response } from "express";
+import { ParamsDictionary } from "express-serve-static-core";
 
 // --- Mock Setup ---
 
@@ -18,6 +19,9 @@ import { Request, Response } from "express";
 jest.mock("../src/config/firebase", () => ({
   auth: jest.fn().mockReturnValue({
     createUser: jest.fn(),
+    setCustomUserClaims: jest.fn(),
+    listUsers: jest.fn(),
+    getUser: jest.fn(),
   }),
 }));
 
@@ -157,6 +161,164 @@ describe("Auth Controller", () => {
     });
   });
 });
+
+  // --- setUserRole Tests ---
+  describe("setUserRole", () => {
+    it("should set a user role successfully", async () => {
+      const req = {
+        body: {
+          uid: "mock-uid",
+          role: "admin",
+        },
+      } as Request;
+
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      } as unknown as Response;
+
+      const mockSetCustomUserClaims = admin.auth().setCustomUserClaims as jest.Mock;
+      mockSetCustomUserClaims.mockResolvedValue({});
+
+      await setUserRole(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({
+        message: "Role 'admin' set for user mock-uid",
+      });
+    });
+
+    it("should handle error when setting user role fails", async () => {
+      const req = {
+        body: {
+          uid: "mock-uid",
+          role: "admin",
+        },
+      } as Request;
+
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      } as unknown as Response;
+
+      const mockSetCustomUserClaims = admin.auth().setCustomUserClaims as jest.Mock;
+      mockSetCustomUserClaims.mockRejectedValue(new Error("Failed to set user role"));
+
+      await setUserRole(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
+        message: "Failed to set user role",
+        error: "Failed to set user role",
+      });
+    });
+  });
+
+  // --- listUsers Tests ---
+  describe("listUsers", () => {
+    it("should list users successfully", async () => {
+      const req = {} as Request;
+
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      } as unknown as Response;
+
+      const mockListUsers = admin.auth().listUsers as jest.Mock;
+      mockListUsers.mockResolvedValue({
+        users: [
+          { uid: "mock-uid", email: "test@example.com", displayName: "Test User", customClaims: {} },
+        ],
+      });
+
+      await listUsers(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({
+        users: [
+          { uid: "mock-uid", email: "test@example.com", displayName: "Test User", customClaims: {} },
+        ],
+      });
+    });
+
+    it("should handle error when listing users fails", async () => {
+      const req = {} as Request;
+
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      } as unknown as Response;
+
+      const mockListUsers = admin.auth().listUsers as jest.Mock;
+      mockListUsers.mockRejectedValue(new Error("Failed to list users"));
+
+      await listUsers(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
+        message: "Failed to list users",
+        error: "Failed to list users",
+      });
+    });
+  });
+
+  // --- getUserById Tests ---
+  describe("getUserById", () => {
+    it("should retrieve a user by ID successfully", async () => {
+      const req = {
+        params: {
+          id: "mock-uid",
+        },
+      } as unknown as Request;
+
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      } as unknown as Response;
+
+      const mockGetUser = admin.auth().getUser as jest.Mock;
+      mockGetUser.mockResolvedValue({
+        uid: "mock-uid",
+        email: "test@example.com",
+        displayName: "Test User",
+        customClaims: {},
+      });
+
+      await getUserById(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({
+        uid: "mock-uid",
+        email: "test@example.com",
+        displayName: "Test User",
+        customClaims: {},
+      });
+    });
+
+    it("should handle error when user not found", async () => {
+      const req = {
+        params: {
+          id: "mock-uid",
+        },
+      } as unknown as Request;
+
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      } as unknown as Response;
+
+      const mockGetUser = admin.auth().getUser as jest.Mock;
+      mockGetUser.mockRejectedValue(new Error("User not found"));
+
+      await getUserById(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.json).toHaveBeenCalledWith({
+        message: "User not found",
+        error: "User not found",
+      });
+    });
+  });
 
 describe("Auth Routes (Integration Tests)", () => {
   it("should return 401 on login with invalid credentials", async () => {
