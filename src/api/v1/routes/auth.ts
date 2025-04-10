@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { registerUser } from "../controllers/authController";
-import { loginUser } from "../controllers/authController";
+import { registerUser, loginUser, setUserRole, listUsers, getUserById } from "../controllers/authController";
+import { verifyRole, verifySelfOrAdmin } from "../../../middleware/auth";
 
 const router: Router = Router();
 
@@ -115,4 +115,91 @@ router.post("/register", registerUser);
  *                   example: "Invalid credentials"
  */
 router.post("/login", loginUser);
+
+/**
+ * @swagger
+ * /auth/set-role:
+ *   post:
+ *     tags:
+ *       - Auth
+ *     description: Assign a custom role to a user (Admin only)
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: body
+ *         name: data
+ *         required: true
+ *         description: User UID and role
+ *         schema:
+ *           type: object
+ *           required:
+ *             - uid
+ *             - role
+ *           properties:
+ *             uid:
+ *               type: string
+ *               example: "uid_123"
+ *             role:
+ *               type: string
+ *               example: "Investor"
+ *     responses:
+ *       200:
+ *         description: Role set successfully
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       500:
+ *         description: Server error
+ */
+router.post("/set-role", verifyRole(["Admin"]), setUserRole);
+
+/**
+ * @swagger
+ * /users:
+ *   get:
+ *     tags:
+ *       - Users
+ *     description: List all users (Admin only)
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Array of user profiles
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       500:
+ *         description: Server error
+ */
+router.get("/users", verifyRole(["Admin"]), listUsers);
+
+/**
+ * @swagger
+ * /users/{id}:
+ *   get:
+ *     tags:
+ *       - Users
+ *     description: Get user profile by ID (Admin or Owner only)
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: User ID to fetch
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: User profile details
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: User not found
+ */
+router.get("/users/:id", verifySelfOrAdmin, getUserById);
 export default router;
