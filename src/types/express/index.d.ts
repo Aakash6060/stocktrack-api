@@ -34,5 +34,10 @@ declare global {
   }
 }
 
+export interface AuthRequestBody {
+  email: string;
+  password: string;
+}
+
 // Required to ensure this file is treated as a module
 export {};
