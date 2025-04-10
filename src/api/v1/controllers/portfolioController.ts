@@ -16,10 +16,14 @@ import admin from "../../../config/firebase";
  * @returns {Promise<void>} Responds with a success message or error.
  */
 export const addStockToPortfolio = async (req: Request, res: Response): Promise<void> => {
-  const { symbol, quantity, averageBuyPrice } = req.body;
-
   try {
-    const db = admin.firestore();
+    const { symbol, quantity, averageBuyPrice } = req.body as {
+      symbol: string;
+      quantity: number;
+      averageBuyPrice: number;
+    };
+
+    const db: FirebaseFirestore.Firestore = admin.firestore();
 
     await db.collection("portfolios").add({
       symbol,
@@ -28,7 +32,7 @@ export const addStockToPortfolio = async (req: Request, res: Response): Promise<
     });
 
     res.status(201).json({ message: "Stock added to portfolio" });
-  } catch (error) {
+  } catch {
     res.status(500).json({ error: "Failed to add stock" });
   }
 };

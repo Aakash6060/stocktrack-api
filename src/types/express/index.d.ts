@@ -15,9 +15,16 @@
 
 import * as admin from "firebase-admin";
 
+// Extending Express's Request interface with AuthRequestBody
+export interface AuthRequestBody {
+  email: string;
+  password: string;
+}
+
 declare global {
   namespace Express {
     interface Request {
+      body: AuthRequestBody;
       /**
        * The Firebase decoded ID token, added to the request after authentication.
        * Optional because unauthenticated requests won't have this field.

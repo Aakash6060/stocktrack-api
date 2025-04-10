@@ -6,6 +6,8 @@
 import { registerUser, loginUser } from "../src/api/v1/controllers/authController";
 import admin from "../src/config/firebase";
 import axios from "axios";
+import request from "supertest";
+import app from "../src/app";
 import { Request, Response } from "express";
 
 // --- Mock Setup ---
@@ -48,7 +50,7 @@ describe("Auth Controller", () => {
 
       const mockCreateUser = admin.auth().createUser as jest.Mock;
       mockCreateUser.mockResolvedValue({
-        uid: "12345",
+        uid: "mock-uid",
         email: "test@example.com",
       });
 
@@ -56,7 +58,7 @@ describe("Auth Controller", () => {
 
       expect(res.status).toHaveBeenCalledWith(201);
       expect(res.json).toHaveBeenCalledWith({
-        uid: "12345",
+        uid: "mock-uid",
         email: "test@example.com",
       });
     });
@@ -86,7 +88,7 @@ describe("Auth Controller", () => {
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
         message: "Registration failed",
-        error: expect.any(Error),
+        error: "Registration failed",
       });
     });
   });
@@ -148,7 +150,32 @@ describe("Auth Controller", () => {
       await loginUser(req, res);
 
       expect(res.status).toHaveBeenCalledWith(401);
-      expect(res.json).toHaveBeenCalledWith({ message: "Invalid credentials" });
+      expect(res.json).toHaveBeenCalledWith({
+        message: "Invalid credentials",
+        error: "Invalid credentials",
+      });
     });
+  });
+});
+
+describe("Auth Routes (Integration Tests)", () => {
+  it("should return 401 on login with invalid credentials", async () => {
+    const res = await request(app).post("/api/v1/auth/login").send({
+      email: "wrong@example.com",
+      password: "wrongpassword",
+    });
+
+    expect(res.status).toBe(401);
+    expect(res.body).toHaveProperty("message", "Invalid credentials");
+  });
+
+  it("should return 500 on registration failure", async () => {
+    const res = await request(app).post("/api/v1/auth/register").send({
+      email: "",
+      password: "123",
+    });
+
+    expect(res.status).toBe(500);
+    expect(res.body).toHaveProperty("message", "Registration failed");
   });
 });

@@ -5,6 +5,8 @@
 
 import { getStockData, getStockHistory, getStockNews } from "../src/api/v1/controllers/stockController";
 import { Request, Response } from "express";
+import request from "supertest";
+import app from "../src/app";
 
 // --- Helper Function ---
 
@@ -13,12 +15,12 @@ import { Request, Response } from "express";
  * @param params - Object containing stock symbol.
  * @returns A mocked Express Request object.
  */
-const createRequest = (params: { symbol: string }): Request => ({
+const createRequest = (params: { symbol: string }): Request<{ symbol: string }> => ({
   params,
   body: {},
   query: {},
   headers: {},
-} as unknown as Request);
+} as unknown as Request<{ symbol: string }>);
 
 // --- Test Suite ---
 
@@ -163,5 +165,49 @@ describe("Stock Controller", () => {
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({ error: "Failed to fetch stock news" });
     });
+  });
+});
+
+describe("Stock Routes (Integration Tests)", () => {
+  it("should return stock data for a valid symbol", async () => {
+    const res = await request(app).get("/api/v1/stocks/AAPL");
+
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveProperty("symbol", "AAPL");
+    expect(res.body).toHaveProperty("price");
+    expect(res.body).toHaveProperty("currency", "USD");
+    expect(res.body).toHaveProperty("timestamp");
+  });
+
+  it("should return stock history for a valid symbol", async () => {
+    const res = await request(app).get("/api/v1/stocks/AAPL/history");
+
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveProperty("symbol", "AAPL");
+    expect(res.body).toHaveProperty("history");
+    expect(Array.isArray(res.body.history)).toBe(true);
+  });
+
+  it("should return stock news for a valid symbol", async () => {
+    const res = await request(app).get("/api/v1/stocks/AAPL/news");
+
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveProperty("symbol", "AAPL");
+    expect(res.body).toHaveProperty("news");
+    expect(Array.isArray(res.body.news)).toBe(true);
+  });
+
+  it("should handle error when fetching history for invalid symbol", async () => {
+    const res = await request(app).get("/api/v1/stocks/error/history");
+
+    expect(res.status).toBe(500);
+    expect(res.body).toHaveProperty("error", "Failed to fetch stock history");
+  });
+
+  it("should handle error when fetching news for invalid symbol", async () => {
+    const res = await request(app).get("/api/v1/stocks/error/news");
+
+    expect(res.status).toBe(500);
+    expect(res.body).toHaveProperty("error", "Failed to fetch stock news");
   });
 });

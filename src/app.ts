@@ -1,20 +1,22 @@
 import * as dotenv from 'dotenv';
-import express from "express";
+import express, { Express, Request, Response } from "express";
 import morgan from "morgan";
 import cors from "cors";
-import { Request, Response } from "express";
 
 import authRoutes from "./api/v1/routes/auth";
 import stockRoutes from "./api/v1/routes/stock";
 import portfolioRoutes from "./api/v1/routes/portfolio";
 import { specs, swaggerUi } from './swagger';
 
-const app = express();
-
 /**
  * Loads environment variables from .env file into process.env.
  */
 dotenv.config();
+
+/**
+ * Create Express app instance with proper type annotation.
+ */
+const app: Express = express();
 
 /**
  * Middleware to parse incoming JSON requests.

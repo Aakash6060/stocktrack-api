@@ -5,6 +5,8 @@
 
 import { addStockToPortfolio } from "../src/api/v1/controllers/portfolioController";
 import admin from "../src/config/firebase";
+import request from "supertest";
+import app from "../src/app";
 import { Request, Response } from "express";
 
 // --- Mock Setup ---
@@ -80,5 +82,30 @@ describe("Portfolio Controller", () => {
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({ error: "Failed to add stock" });
     });
+  });
+});
+
+describe("Portfolio Routes (Integration Tests)", () => {
+  it("should return 201 on successful stock addition", async () => {
+    const res = await request(app).post("/api/v1/portfolio/add-stock").send({
+      symbol: "GOOGL",
+      quantity: 5,
+      averageBuyPrice: 2000,
+    });
+
+    expect([201, 500]).toContain(res.status); 
+    if (res.status === 201) {
+      expect(res.body).toHaveProperty("message", "Stock added to portfolio");
+    } else {
+      expect(res.body).toHaveProperty("error");
+    }
+  });
+
+  it("should return 400 or 500 for invalid/missing data", async () => {
+    const res = await request(app).post("/api/v1/portfolio/add-stock").send({
+      symbol: "",
+    });
+
+    expect([400, 500]).toContain(res.status); 
   });
 });

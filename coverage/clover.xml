@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<coverage generated="1744304432055" clover="3.2.0">
+  <project timestamp="1744304432055" name="All files">
+    <metrics statements="131" coveredstatements="120" conditionals="26" coveredconditionals="16" methods="13" coveredmethods="12" elements="170" coveredelements="148" complexity="0" loc="131" ncloc="131" packages="5" files="10" classes="10"/>
+    <package name="src">
+      <metrics statements="25" coveredstatements="24" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="0"/>
+      <file name="app.ts" path="C:\Users\aakas\OneDrive - Red River College Polytech\Desktop\rrc_polytech\Term_3\Back_End_Development\Assignments\Aakash_0405969_stocktrack-api\src\app.ts">
+        <metrics statements="20" coveredstatements="19" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="0"/>
+        <line num="1" count="3" type="stmt"/>
+        <line num="2" count="3" type="stmt"/>
+        <line num="3" count="3" type="stmt"/>
+        <line num="4" count="3" type="stmt"/>
+        <line num="6" count="3" type="stmt"/>
+        <line num="7" count="3" type="stmt"/>
+        <line num="8" count="3" type="stmt"/>
+        <line num="9" count="3" type="stmt"/>
+        <line num="14" count="3" type="stmt"/>
+        <line num="19" count="3" type="stmt"/>
+        <line num="24" count="3" type="stmt"/>
+        <line num="29" count="3" type="stmt"/>
+        <line num="34" count="3" type="stmt"/>
+        <line num="39" count="3" type="stmt"/>
+        <line num="45" count="3" type="stmt"/>
+        <line num="51" count="3" type="stmt"/>
+        <line num="57" count="3" type="stmt"/>
+        <line num="62" count="3" type="stmt"/>
+        <line num="63" count="0" type="stmt"/>
+        <line num="66" count="3" type="stmt"/>
+      </file>
+      <file name="swagger.ts" path="C:\Users\aakas\OneDrive - Red River College Polytech\Desktop\rrc_polytech\Term_3\Back_End_Development\Assignments\Aakash_0405969_stocktrack-api\src\swagger.ts">
+        <metrics statements="5" coveredstatements="5" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="6" count="3" type="stmt"/>
+        <line num="7" count="3" type="stmt"/>
+        <line num="14" count="3" type="stmt"/>
+        <line num="27" count="3" type="stmt"/>
+        <line num="30" count="3" type="stmt"/>
+      </file>
+    </package>
+    <package name="src.api.v1.controllers">
+      <metrics statements="50" coveredstatements="48" conditionals="6" coveredconditionals="4" methods="9" coveredmethods="9"/>
+      <file name="authController.ts" path="C:\Users\aakas\OneDrive - Red River College Polytech\Desktop\rrc_polytech\Term_3\Back_End_Development\Assignments\Aakash_0405969_stocktrack-api\src\api\v1\controllers\authController.ts">
+        <metrics statements="20" coveredstatements="18" conditionals="4" coveredconditionals="2" methods="4" coveredmethods="4"/>
+        <line num="2" count="3" type="stmt"/>
+        <line num="3" count="3" type="stmt"/>
+        <line num="18" count="3" type="stmt"/>
+        <line num="21" count="3" type="stmt"/>
+        <line num="22" count="3" type="stmt"/>
+        <line num="23" count="3" type="stmt"/>
+        <line num="24" count="3" type="stmt"/>
+        <line num="25" count="1" type="stmt"/>
+        <line num="27" count="2" type="cond" truecount="1" falsecount="1"/>
+        <line num="28" count="2" type="stmt"/>
+        <line num="30" count="0" type="stmt"/>
+        <line num="57" count="3" type="stmt"/>
+        <line num="60" count="3" type="stmt"/>
+        <line num="61" count="3" type="stmt"/>
+        <line num="63" count="3" type="stmt"/>
+        <line num="64" count="3" type="stmt"/>
+        <line num="68" count="1" type="stmt"/>
+        <line num="70" count="2" type="cond" truecount="1" falsecount="1"/>
+        <line num="71" count="2" type="stmt"/>
+        <line num="73" count="0" type="stmt"/>
+      </file>
+      <file name="portfolioController.ts" path="C:\Users\aakas\OneDrive - Red River College Polytech\Desktop\rrc_polytech\Term_3\Back_End_Development\Assignments\Aakash_0405969_stocktrack-api\src\api\v1\controllers\portfolioController.ts">
+        <metrics statements="8" coveredstatements="8" conditionals="0" coveredconditionals="0" methods="2" coveredmethods="2"/>
+        <line num="2" count="3" type="stmt"/>
+        <line num="18" count="4" type="stmt"/>
+        <line num="19" count="4" type="stmt"/>
+        <line num="20" count="4" type="stmt"/>
+        <line num="26" count="4" type="stmt"/>
+        <line num="28" count="4" type="stmt"/>
+        <line num="34" count="1" type="stmt"/>
+        <line num="36" count="3" type="stmt"/>
+      </file>
+      <file name="stockController.ts" path="C:\Users\aakas\OneDrive - Red River College Polytech\Desktop\rrc_polytech\Term_3\Back_End_Development\Assignments\Aakash_0405969_stocktrack-api\src\api\v1\controllers\stockController.ts">
+        <metrics statements="22" coveredstatements="22" conditionals="2" coveredconditionals="2" methods="3" coveredmethods="3"/>
+        <line num="10" count="3" type="stmt"/>
+        <line num="11" count="3" type="stmt"/>
+        <line num="13" count="3" type="stmt"/>
+        <line num="14" count="3" type="stmt"/>
+        <line num="16" count="2" type="stmt"/>
+        <line num="23" count="1" type="stmt"/>
+        <line num="34" count="3" type="stmt"/>
+        <line num="35" count="4" type="stmt"/>
+        <line num="37" count="4" type="stmt"/>
+        <line num="38" count="4" type="cond" truecount="1" falsecount="0"/>
+        <line num="39" count="2" type="stmt"/>
+        <line num="42" count="2" type="stmt"/>
+        <line num="48" count="2" type="stmt"/>
+        <line num="53" count="2" type="stmt"/>
+        <line num="64" count="3" type="stmt"/>
+        <line num="65" count="4" type="stmt"/>
+        <line num="67" count="4" type="stmt"/>
+        <line num="68" count="4" type="cond" truecount="1" falsecount="0"/>
+        <line num="69" count="2" type="stmt"/>
+        <line num="72" count="2" type="stmt"/>
+        <line num="87" count="2" type="stmt"/>
+        <line num="92" count="2" type="stmt"/>
+      </file>
+    </package>
+    <package name="src.api.v1.routes">
+      <metrics statements="19" coveredstatements="19" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+      <file name="auth.ts" path="C:\Users\aakas\OneDrive - Red River College Polytech\Desktop\rrc_polytech\Term_3\Back_End_Development\Assignments\Aakash_0405969_stocktrack-api\src\api\v1\routes\auth.ts">
+        <metrics statements="7" coveredstatements="7" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="1" count="3" type="stmt"/>
+        <line num="2" count="3" type="stmt"/>
+        <line num="3" count="3" type="stmt"/>
+        <line num="5" count="3" type="stmt"/>
+        <line num="66" count="3" type="stmt"/>
+        <line num="117" count="3" type="stmt"/>
+        <line num="118" count="3" type="stmt"/>
+      </file>
+      <file name="portfolio.ts" path="C:\Users\aakas\OneDrive - Red River College Polytech\Desktop\rrc_polytech\Term_3\Back_End_Development\Assignments\Aakash_0405969_stocktrack-api\src\api\v1\routes\portfolio.ts">
+        <metrics statements="5" coveredstatements="5" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="1" count="3" type="stmt"/>
+        <line num="2" count="3" type="stmt"/>
+        <line num="4" count="3" type="stmt"/>
+        <line num="60" count="3" type="stmt"/>
+        <line num="62" count="3" type="stmt"/>
+      </file>
+      <file name="stock.ts" path="C:\Users\aakas\OneDrive - Red River College Polytech\Desktop\rrc_polytech\Term_3\Back_End_Development\Assignments\Aakash_0405969_stocktrack-api\src\api\v1\routes\stock.ts">
+        <metrics statements="7" coveredstatements="7" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="1" count="3" type="stmt"/>
+        <line num="2" count="3" type="stmt"/>
+        <line num="4" count="3" type="stmt"/>
+        <line num="54" count="3" type="stmt"/>
+        <line num="105" count="3" type="stmt"/>
+        <line num="161" count="3" type="stmt"/>
+        <line num="163" count="3" type="stmt"/>
+      </file>
+    </package>
+    <package name="src.config">
+      <metrics statements="21" coveredstatements="13" conditionals="12" coveredconditionals="4" methods="0" coveredmethods="0"/>
+      <file name="firebase.ts" path="C:\Users\aakas\OneDrive - Red River College Polytech\Desktop\rrc_polytech\Term_3\Back_End_Development\Assignments\Aakash_0405969_stocktrack-api\src\config\firebase.ts">
+        <metrics statements="21" coveredstatements="13" conditionals="12" coveredconditionals="4" methods="0" coveredmethods="0"/>
+        <line num="8" count="1" type="stmt"/>
+        <line num="9" count="1" type="stmt"/>
+        <line num="12" count="1" type="stmt"/>
+        <line num="15" count="1" type="stmt"/>
+        <line num="26" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="27" count="0" type="stmt"/>
+        <line num="28" count="0" type="stmt"/>
+        <line num="29" count="0" type="cond" truecount="0" falsecount="4"/>
+        <line num="30" count="0" type="stmt"/>
+        <line num="32" count="0" type="stmt"/>
+        <line num="36" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="37" count="0" type="stmt"/>
+        <line num="40" count="1" type="stmt"/>
+        <line num="41" count="1" type="stmt"/>
+        <line num="42" count="1" type="stmt"/>
+        <line num="44" count="1" type="cond" truecount="3" falsecount="1"/>
+        <line num="45" count="1" type="stmt"/>
+        <line num="47" count="0" type="stmt"/>
+        <line num="54" count="1" type="stmt"/>
+        <line num="63" count="1" type="stmt"/>
+        <line num="69" count="1" type="stmt"/>
+      </file>
+    </package>
+    <package name="src.middleware">
+      <metrics statements="16" coveredstatements="16" conditionals="8" coveredconditionals="8" methods="3" coveredmethods="3"/>
+      <file name="auth.ts" path="C:\Users\aakas\OneDrive - Red River College Polytech\Desktop\rrc_polytech\Term_3\Back_End_Development\Assignments\Aakash_0405969_stocktrack-api\src\middleware\auth.ts">
+        <metrics statements="16" coveredstatements="16" conditionals="8" coveredconditionals="8" methods="3" coveredmethods="3"/>
+        <line num="2" count="1" type="stmt"/>
+        <line num="18" count="3" type="stmt"/>
+        <line num="22" count="6" type="stmt"/>
+        <line num="23" count="6" type="cond" truecount="4" falsecount="0"/>
+        <line num="24" count="6" type="cond" truecount="1" falsecount="0"/>
+        <line num="25" count="1" type="stmt"/>
+        <line num="26" count="1" type="stmt"/>
+        <line num="29" count="5" type="stmt"/>
+        <line num="30" count="5" type="stmt"/>
+        <line num="32" count="4" type="stmt"/>
+        <line num="33" count="4" type="cond" truecount="3" falsecount="0"/>
+        <line num="34" count="2" type="stmt"/>
+        <line num="35" count="2" type="stmt"/>
+        <line num="38" count="2" type="stmt"/>
+        <line num="39" count="2" type="stmt"/>
+        <line num="41" count="1" type="stmt"/>
+      </file>
+    </package>
+  </project>
+</coverage>
