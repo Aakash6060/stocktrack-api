@@ -9,20 +9,28 @@ import axios from "axios";
 import request from "supertest";
 import app from "../src/app";
 import { Request, Response } from "express";
-import { ParamsDictionary } from "express-serve-static-core";
 
 // --- Mock Setup ---
 
 /**
  * Mock Firebase Admin SDK's auth module.
  */
+const mockAuth = {
+  createUser: jest.fn(),
+  setCustomUserClaims: jest.fn(),
+  listUsers: jest.fn(),
+  getUser: jest.fn(),
+  verifyIdToken: jest.fn(),
+};
+
+/**
+ * Mock Firebase Admin SDK's auth module
+ */
 jest.mock("../src/config/firebase", () => ({
-  auth: jest.fn().mockReturnValue({
-    createUser: jest.fn(),
-    setCustomUserClaims: jest.fn(),
-    listUsers: jest.fn(),
-    getUser: jest.fn(),
-  }),
+  __esModule: true,
+  default: {
+    auth: jest.fn(() => mockAuth),
+  },
 }));
 
 /**
@@ -319,8 +327,16 @@ describe("Auth Controller", () => {
       });
     });
   });
-
+  
 describe("Auth Routes (Integration Tests)", () => {
+  beforeEach(() => {
+    mockAuth.verifyIdToken.mockResolvedValue({
+      uid: "mockUid123",
+      role: "Admin",
+      customClaims: { role: "Admin" },
+    });
+  });
+
   it("should return 401 on login with invalid credentials", async () => {
     const res = await request(app).post("/api/v1/auth/login").send({
       email: "wrong@example.com",
@@ -341,3 +357,61 @@ describe("Auth Routes (Integration Tests)", () => {
     expect(res.body).toHaveProperty("message", "Registration failed");
   });
 });
+
+  it("should set user role successfully", async () => {
+    mockAuth.setCustomUserClaims.mockResolvedValueOnce({});
+    const res = await request(app)
+      .post("/api/v1/auth/set-role")
+      .set("Authorization", "Bearer mockToken")
+      .send({ uid: "mockUid123", role: "admin" });
+
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveProperty("message", "Role 'admin' set for user mockUid123");
+  });
+
+  it("should list all users", async () => {
+    mockAuth.listUsers.mockResolvedValueOnce({
+      users: [
+        {
+          uid: "uid123",
+          email: "test@example.com",
+          displayName: "Test User",
+          customClaims: { role: "investor" },
+        },
+      ],
+    });
+
+    const res = await request(app)
+      .get("/api/v1/auth/users")
+      .set("Authorization", "Bearer mockToken");
+
+    expect(res.status).toBe(200);
+    expect(res.body.users).toBeInstanceOf(Array);
+    expect(res.body.users[0]).toMatchObject({
+      uid: "uid123",
+      email: "test@example.com",
+      displayName: "Test User",
+      customClaims: { role: "investor" },
+    });
+  });
+
+  it("should retrieve a user by ID", async () => {
+    mockAuth.getUser.mockResolvedValueOnce({
+      uid: "uid456",
+      email: "admin@example.com",
+      displayName: "Admin User",
+      customClaims: { role: "admin" },
+    });
+
+    const res = await request(app)
+      .get("/api/v1/auth/users/uid456")
+      .set("Authorization", "Bearer mockToken");
+
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      uid: "uid456",
+      email: "admin@example.com",
+      displayName: "Admin User",
+      customClaims: { role: "admin" },
+    });
+  });

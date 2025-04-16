@@ -20,7 +20,7 @@ const options: Options = {
       description: 'This is a back-end API for managing stocks, portfolios, and market insights.',
     },
   },
-  apis: ['./src/api/v1/routes/*.ts'], // Adjust path as needed
+  apis: ['./src/api/v1/routes/*.ts'],
 };
 
 // Generate Swagger specifications from the provided options
