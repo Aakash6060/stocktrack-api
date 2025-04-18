@@ -92,3 +92,21 @@ export const getStockNews = (req: Request<{ symbol: string }>, res: Response): v
     res.status(500).json({ error: "Failed to fetch stock news" });
   }
 };
+
+/**
+ * @route GET /api/v1/stocks/market-trends
+ * @description Returns mock data for current stock market trends.
+ */
+export const getMarketTrends = (_req: Request, res: Response): void => {
+  try {
+    const mockTrends = [
+      { sector: "Technology", trend: "Up", changePercent: "+1.5%" },
+      { sector: "Healthcare", trend: "Down", changePercent: "-0.8%" },
+      { sector: "Finance", trend: "Neutral", changePercent: "0.0%" },
+    ];
+
+    res.status(200).json({ trends: mockTrends });
+  } catch {
+    res.status(500).json({ error: "Failed to fetch market trends" });
+  }
+};
