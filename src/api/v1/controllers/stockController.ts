@@ -158,3 +158,27 @@ export const getStockSentiment = (req: Request<{ symbol: string }>, res: Respons
     res.status(500).json({ error: "Failed to analyze sentiment" });
   }
 };
+
+/**
+ * @route POST /api/v1/stocks/:symbol/alerts
+ * @description Mocks setting a price alert for a given stock (Investor only).
+ */
+export const setStockAlert = (req: Request<{ symbol: string }>, res: Response): void => {
+  const { symbol } = req.params;
+  const { targetPrice } = req.body;
+
+  try {
+    if (!targetPrice) {
+      res.status(400).json({ error: "targetPrice is required" });
+    }
+
+    const mockAlertId = `alert_${symbol}_${Date.now()}`;
+
+    res.status(201).json({
+      message: `Alert set for ${symbol.toUpperCase()} at price $${targetPrice}`,
+      alertId: mockAlertId,
+    });
+  } catch {
+    res.status(500).json({ error: "Failed to set stock alert" });
+  }
+};
