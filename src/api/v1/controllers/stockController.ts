@@ -137,3 +137,24 @@ export const searchStocks = (req: Request, res: Response): void => {
     res.status(500).json({ error: "Failed to search stocks" });
   }
 };
+
+/**
+ * @route GET /api/v1/stocks/:symbol/sentiment
+ * @description Returns mock sentiment analysis result for a given stock.
+ */
+export const getStockSentiment = (req: Request<{ symbol: string }>, res: Response): void => {
+  const { symbol } = req.params;
+
+  try {
+    const mockSentiment = {
+      symbol: symbol.toUpperCase(),
+      sentimentScore: 0.78,
+      sentiment: "Positive",
+      summary: "Most recent news articles reflect positive sentiment toward the stock.",
+    };
+
+    res.status(200).json(mockSentiment);
+  } catch {
+    res.status(500).json({ error: "Failed to analyze sentiment" });
+  }
+};
