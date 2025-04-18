@@ -110,3 +110,30 @@ export const getMarketTrends = (_req: Request, res: Response): void => {
     res.status(500).json({ error: "Failed to fetch market trends" });
   }
 };
+
+/**
+ * @route GET /api/v1/stocks/search
+ * @description Searches mock stock list by symbol or name (case-insensitive).
+ */
+export const searchStocks = (req: Request, res: Response): void => {
+  const query = req.query.q?.toString().toLowerCase();
+
+  try {
+    const mockStocks = [
+      { symbol: "AAPL", name: "Apple Inc." },
+      { symbol: "GOOGL", name: "Alphabet Inc." },
+      { symbol: "TSLA", name: "Tesla Inc." },
+      { symbol: "AMZN", name: "Amazon.com Inc." },
+    ];
+
+    const results = mockStocks.filter(
+      stock =>
+        stock.symbol.toLowerCase().includes(query || "") ||
+        stock.name.toLowerCase().includes(query || "")
+    );
+
+    res.status(200).json({ results });
+  } catch {
+    res.status(500).json({ error: "Failed to search stocks" });
+  }
+};
