@@ -94,3 +94,34 @@ export const removeStockFromPortfolio = async (req: Request, res: Response): Pro
     res.status(500).json({ error: "Failed to remove stock" });
   }
 };
+
+/**
+ * @route GET /portfolio/performance
+ * @description Analyzes user's portfolio performance.
+ * @access Investor
+ * 
+ * @returns {Promise<void>} Portfolio performance summary
+ */
+export const getPortfolioPerformance = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const db = admin.firestore();
+    const snapshot = await db.collection("portfolios").get();
+
+    let totalInvestment = 0;
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      totalInvestment += data.quantity * data.averageBuyPrice;
+    });
+
+    // For now, assume static performance calculation
+    const performance = {
+      totalInvestment,
+      totalValue: totalInvestment * 1.1, // Simulate 10% return
+      returnPercentage: 10
+    };
+
+    res.status(200).json({ performance });
+  } catch {
+    res.status(500).json({ error: "Failed to calculate performance" });
+  }
+};
