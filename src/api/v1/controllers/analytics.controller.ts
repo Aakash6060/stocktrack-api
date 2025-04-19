@@ -14,9 +14,9 @@ import admin from "../../../config/firebase";
 export const getMarketPerformance = async (req: Request, res: Response): Promise<void> => {
   try {
     const db: FirebaseFirestore.Firestore = admin.firestore();
-    const snapshot = await db.collection("marketPerformance").get();
+    const snapshot: FirebaseFirestore.QuerySnapshot = await db.collection("marketPerformance").get();
 
-    const data = snapshot.docs.map(doc => doc.data());
+    const data: FirebaseFirestore.DocumentData[] = snapshot.docs.map(doc => doc.data());
 
     res.status(200).json({ data });
   } catch {
@@ -35,22 +35,22 @@ export const getMarketPerformance = async (req: Request, res: Response): Promise
  * @returns {Promise<void>} Sector insight data
  */
 export const getSectorInsights = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { sector } = req.params;
-      const db: FirebaseFirestore.Firestore = admin.firestore();
-  
-      const snapshot = await db.collection("sectors").doc(sector).get();
-  
-      if (!snapshot.exists) {
-        res.status(404).json({ message: "Sector data not found" });
-        return;
-      }
-  
-      res.status(200).json({ insights: snapshot.data() });
-    } catch {
-      res.status(500).json({ error: "Failed to retrieve sector insights" });
+  try {
+    const { sector } = req.params;
+    const db: FirebaseFirestore.Firestore = admin.firestore();
+
+    const snapshot: FirebaseFirestore.DocumentSnapshot = await db.collection("sectors").doc(sector).get();
+
+    if (!snapshot.exists) {
+      res.status(404).json({ message: "Sector data not found" });
+      return;
     }
-  };  
+
+    res.status(200).json({ insights: snapshot.data() });
+  } catch {
+    res.status(500).json({ error: "Failed to retrieve sector insights" });
+  }
+};
 
 /**
  * @route GET /analytics/top-movers
@@ -63,20 +63,20 @@ export const getSectorInsights = async (req: Request, res: Response): Promise<vo
  * @returns {Promise<void>} Top gainers and losers
  */
 export const getTopMovers = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const db: FirebaseFirestore.Firestore = admin.firestore();
-  
-      const gainersSnap = await db.collection("topMovers").doc("gainers").get();
-      const losersSnap = await db.collection("topMovers").doc("losers").get();
-  
-      res.status(200).json({
-        topGainers: gainersSnap.data(),
-        topLosers: losersSnap.data()
-      });
-    } catch {
-      res.status(500).json({ error: "Failed to fetch top movers" });
-    }
-  };
+  try {
+    const db: FirebaseFirestore.Firestore = admin.firestore();
+
+    const gainersSnap: FirebaseFirestore.DocumentSnapshot = await db.collection("topMovers").doc("gainers").get();
+    const losersSnap: FirebaseFirestore.DocumentSnapshot = await db.collection("topMovers").doc("losers").get();
+
+    res.status(200).json({
+      topGainers: gainersSnap.data(),
+      topLosers: losersSnap.data()
+    });
+  } catch {
+    res.status(500).json({ error: "Failed to fetch top movers" });
+  }
+};
 
 /**
  * @route GET /analytics/user-trends
@@ -89,17 +89,23 @@ export const getTopMovers = async (req: Request, res: Response): Promise<void> =
  * @returns {Promise<void>} User trend analytics
  */
 export const getUserTrends = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const db: FirebaseFirestore.Firestore = admin.firestore();
-      const trendsSnapshot = await db.collection("userTrends").get();
-  
-      const trends = trendsSnapshot.docs.map(doc => doc.data());
-  
-      res.status(200).json({ trends });
-    } catch {
-      res.status(500).json({ error: "Failed to fetch user trends" });
-    }
-  };
+  try {
+    const db: FirebaseFirestore.Firestore = admin.firestore();
+    const trendsSnapshot: FirebaseFirestore.QuerySnapshot = await db.collection("userTrends").get();
+
+    const trends: FirebaseFirestore.DocumentData[] = trendsSnapshot.docs.map(doc => doc.data());
+
+    res.status(200).json({ trends });
+  } catch {
+    res.status(500).json({ error: "Failed to fetch user trends" });
+  }
+};
+
+interface NotificationInput {
+    userId: string;
+    message: string;
+    trigger: string;
+  }
 
 /**
  * @route POST /notifications
@@ -112,22 +118,23 @@ export const getUserTrends = async (req: Request, res: Response): Promise<void> 
  * @returns {Promise<void>} Confirmation message
  */
 export const setNotification = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { userId, message, trigger } = req.body;
-      const db: FirebaseFirestore.Firestore = admin.firestore();
-  
-      const docRef = await db.collection("notifications").add({
-        userId,
-        message,
-        trigger,
-        createdAt: admin.firestore.FieldValue.serverTimestamp()
-      });
-  
-      res.status(201).json({ message: "Notification set", id: docRef.id });
-    } catch {
-      res.status(500).json({ error: "Failed to set notification" });
-    }
-  };
+  try {
+    const { userId, message, trigger } = req.body as NotificationInput;
+
+    const db: FirebaseFirestore.Firestore = admin.firestore();
+
+    const docRef: FirebaseFirestore.DocumentReference = await db.collection("notifications").add({
+      userId,
+      message,
+      trigger,
+      createdAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+
+    res.status(201).json({ message: "Notification set", id: docRef.id });
+  } catch {
+    res.status(500).json({ error: "Failed to set notification" });
+  }
+}; 
 
 /**
  * @route DELETE /notifications/:id
@@ -140,14 +147,14 @@ export const setNotification = async (req: Request, res: Response): Promise<void
  * @returns {Promise<void>} Deletion status
  */
 export const deleteNotification = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      const db: FirebaseFirestore.Firestore = admin.firestore();
-  
-      await db.collection("notifications").doc(id).delete();
-  
-      res.status(200).json({ message: "Notification deleted" });
-    } catch {
-      res.status(500).json({ error: "Failed to delete notification" });
-    }
-  };
+  try {
+    const { id } = req.params;
+    const db: FirebaseFirestore.Firestore = admin.firestore();
+
+    await db.collection("notifications").doc(id).delete();
+
+    res.status(200).json({ message: "Notification deleted" });
+  } catch {
+    res.status(500).json({ error: "Failed to delete notification" });
+  }
+};
