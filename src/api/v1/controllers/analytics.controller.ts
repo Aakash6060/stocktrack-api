@@ -100,3 +100,31 @@ export const getUserTrends = async (req: Request, res: Response): Promise<void> 
       res.status(500).json({ error: "Failed to fetch user trends" });
     }
   };
+
+/**
+ * @route POST /notifications
+ * @description Set user-specific notifications.
+ * @access Investor
+ * 
+ * @param {Request} req - Express request with userId, message, and trigger
+ * @param {Response} res - Express response object
+ * 
+ * @returns {Promise<void>} Confirmation message
+ */
+export const setNotification = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { userId, message, trigger } = req.body;
+      const db: FirebaseFirestore.Firestore = admin.firestore();
+  
+      const docRef = await db.collection("notifications").add({
+        userId,
+        message,
+        trigger,
+        createdAt: admin.firestore.FieldValue.serverTimestamp()
+      });
+  
+      res.status(201).json({ message: "Notification set", id: docRef.id });
+    } catch {
+      res.status(500).json({ error: "Failed to set notification" });
+    }
+  };
