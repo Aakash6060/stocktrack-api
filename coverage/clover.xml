@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1745025124029" clover="3.2.0">
-  <project timestamp="1745025124029" name="All files">
-    <metrics statements="216" coveredstatements="194" conditionals="60" coveredconditionals="37" methods="28" coveredmethods="27" elements="304" coveredelements="258" complexity="0" loc="216" ncloc="216" packages="5" files="10" classes="10"/>
+<coverage generated="1745027642835" clover="3.2.0">
+  <project timestamp="1745027642835" name="All files">
+    <metrics statements="271" coveredstatements="245" conditionals="61" coveredconditionals="38" methods="41" coveredmethods="39" elements="373" coveredelements="322" complexity="0" loc="271" ncloc="271" packages="5" files="10" classes="10"/>
     <package name="src">
       <metrics statements="25" coveredstatements="24" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="0"/>
       <file name="app.ts" path="C:\Users\aakas\OneDrive - Red River College Polytech\Desktop\rrc_polytech\Term_3\Back_End_Development\Assignments\Aakash_0405969_stocktrack-api\src\app.ts">
@@ -37,7 +37,7 @@
       </file>
     </package>
     <package name="src.api.v1.controllers">
-      <metrics statements="106" coveredstatements="100" conditionals="25" coveredconditionals="17" methods="21" coveredmethods="21"/>
+      <metrics statements="155" coveredstatements="145" conditionals="26" coveredconditionals="18" methods="34" coveredmethods="33"/>
       <file name="authController.ts" path="C:\Users\aakas\OneDrive - Red River College Polytech\Desktop\rrc_polytech\Term_3\Back_End_Development\Assignments\Aakash_0405969_stocktrack-api\src\api\v1\controllers\authController.ts">
         <metrics statements="47" coveredstatements="42" conditionals="18" coveredconditionals="11" methods="11" coveredmethods="11"/>
         <line num="2" count="3" type="stmt"/>
@@ -89,15 +89,64 @@
         <line num="165" count="0" type="stmt"/>
       </file>
       <file name="portfolioController.ts" path="C:\Users\aakas\OneDrive - Red River College Polytech\Desktop\rrc_polytech\Term_3\Back_End_Development\Assignments\Aakash_0405969_stocktrack-api\src\api\v1\controllers\portfolioController.ts">
-        <metrics statements="8" coveredstatements="8" conditionals="0" coveredconditionals="0" methods="2" coveredmethods="2"/>
+        <metrics statements="57" coveredstatements="53" conditionals="1" coveredconditionals="1" methods="15" coveredmethods="14"/>
         <line num="2" count="3" type="stmt"/>
-        <line num="18" count="4" type="stmt"/>
-        <line num="19" count="4" type="stmt"/>
-        <line num="20" count="4" type="stmt"/>
-        <line num="26" count="4" type="stmt"/>
-        <line num="28" count="4" type="stmt"/>
-        <line num="34" count="1" type="stmt"/>
-        <line num="36" count="3" type="stmt"/>
+        <line num="28" count="3" type="stmt"/>
+        <line num="31" count="5" type="stmt"/>
+        <line num="32" count="5" type="stmt"/>
+        <line num="33" count="5" type="stmt"/>
+        <line num="35" count="5" type="stmt"/>
+        <line num="37" count="5" type="stmt"/>
+        <line num="43" count="1" type="stmt"/>
+        <line num="45" count="4" type="stmt"/>
+        <line num="59" count="4" type="stmt"/>
+        <line num="60" count="4" type="stmt"/>
+        <line num="61" count="4" type="stmt"/>
+        <line num="62" count="4" type="stmt"/>
+        <line num="65" count="2" type="stmt"/>
+        <line num="66" count="2" type="stmt"/>
+        <line num="71" count="2" type="stmt"/>
+        <line num="77" count="2" type="stmt"/>
+        <line num="79" count="2" type="stmt"/>
+        <line num="93" count="3" type="stmt"/>
+        <line num="94" count="3" type="stmt"/>
+        <line num="95" count="3" type="stmt"/>
+        <line num="96" count="3" type="stmt"/>
+        <line num="99" count="3" type="stmt"/>
+        <line num="101" count="1" type="cond" truecount="1" falsecount="0"/>
+        <line num="102" count="1" type="stmt"/>
+        <line num="103" count="1" type="stmt"/>
+        <line num="106" count="0" type="stmt"/>
+        <line num="107" count="0" type="stmt"/>
+        <line num="108" count="0" type="stmt"/>
+        <line num="110" count="0" type="stmt"/>
+        <line num="112" count="2" type="stmt"/>
+        <line num="123" count="3" type="stmt"/>
+        <line num="124" count="2" type="stmt"/>
+        <line num="125" count="2" type="stmt"/>
+        <line num="126" count="2" type="stmt"/>
+        <line num="128" count="1" type="stmt"/>
+        <line num="129" count="1" type="stmt"/>
+        <line num="130" count="2" type="stmt"/>
+        <line num="134" count="2" type="stmt"/>
+        <line num="141" count="1" type="stmt"/>
+        <line num="147" count="1" type="stmt"/>
+        <line num="149" count="1" type="stmt"/>
+        <line num="163" count="3" type="stmt"/>
+        <line num="166" count="3" type="stmt"/>
+        <line num="167" count="3" type="stmt"/>
+        <line num="168" count="3" type="stmt"/>
+        <line num="170" count="3" type="stmt"/>
+        <line num="171" count="3" type="stmt"/>
+        <line num="173" count="1" type="stmt"/>
+        <line num="175" count="2" type="stmt"/>
+        <line num="189" count="3" type="stmt"/>
+        <line num="190" count="3" type="stmt"/>
+        <line num="191" count="3" type="stmt"/>
+        <line num="192" count="3" type="stmt"/>
+        <line num="194" count="3" type="stmt"/>
+        <line num="196" count="2" type="stmt"/>
+        <line num="198" count="1" type="stmt"/>
       </file>
       <file name="stockController.ts" path="C:\Users\aakas\OneDrive - Red River College Polytech\Desktop\rrc_polytech\Term_3\Back_End_Development\Assignments\Aakash_0405969_stocktrack-api\src\api\v1\controllers\stockController.ts">
         <metrics statements="51" coveredstatements="50" conditionals="7" coveredconditionals="6" methods="8" coveredmethods="8"/>
@@ -155,7 +204,7 @@
       </file>
     </package>
     <package name="src.api.v1.routes">
-      <metrics statements="27" coveredstatements="27" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+      <metrics statements="33" coveredstatements="33" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
       <file name="auth.ts" path="C:\Users\aakas\OneDrive - Red River College Polytech\Desktop\rrc_polytech\Term_3\Back_End_Development\Assignments\Aakash_0405969_stocktrack-api\src\api\v1\routes\auth.ts">
         <metrics statements="10" coveredstatements="10" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
         <line num="1" count="3" type="stmt"/>
@@ -170,12 +219,18 @@
         <line num="205" count="3" type="stmt"/>
       </file>
       <file name="portfolio.ts" path="C:\Users\aakas\OneDrive - Red River College Polytech\Desktop\rrc_polytech\Term_3\Back_End_Development\Assignments\Aakash_0405969_stocktrack-api\src\api\v1\routes\portfolio.ts">
-        <metrics statements="5" coveredstatements="5" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <metrics statements="11" coveredstatements="11" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
         <line num="1" count="3" type="stmt"/>
         <line num="2" count="3" type="stmt"/>
-        <line num="4" count="3" type="stmt"/>
-        <line num="60" count="3" type="stmt"/>
-        <line num="62" count="3" type="stmt"/>
+        <line num="3" count="3" type="stmt"/>
+        <line num="5" count="3" type="stmt"/>
+        <line num="61" count="3" type="stmt"/>
+        <line num="78" count="3" type="stmt"/>
+        <line num="103" count="3" type="stmt"/>
+        <line num="120" count="3" type="stmt"/>
+        <line num="153" count="3" type="stmt"/>
+        <line num="176" count="3" type="stmt"/>
+        <line num="178" count="3" type="stmt"/>
       </file>
       <file name="stock.ts" path="C:\Users\aakas\OneDrive - Red River College Polytech\Desktop\rrc_polytech\Term_3\Back_End_Development\Assignments\Aakash_0405969_stocktrack-api\src\api\v1\routes\stock.ts">
         <metrics statements="12" coveredstatements="12" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
@@ -226,24 +281,24 @@
         <metrics statements="37" coveredstatements="30" conditionals="23" coveredconditionals="16" methods="6" coveredmethods="6"/>
         <line num="2" count="4" type="stmt"/>
         <line num="14" count="4" type="stmt"/>
-        <line num="15" count="7" type="cond" truecount="3" falsecount="0"/>
-        <line num="16" count="7" type="stmt"/>
+        <line num="15" count="15" type="cond" truecount="3" falsecount="0"/>
+        <line num="16" count="15" type="stmt"/>
         <line num="21" count="0" type="stmt"/>
         <line num="23" count="0" type="cond" truecount="0" falsecount="4"/>
-        <line num="40" count="12" type="stmt"/>
-        <line num="44" count="9" type="stmt"/>
-        <line num="45" count="9" type="cond" truecount="4" falsecount="0"/>
-        <line num="46" count="9" type="cond" truecount="1" falsecount="0"/>
+        <line num="40" count="30" type="stmt"/>
+        <line num="44" count="17" type="stmt"/>
+        <line num="45" count="17" type="cond" truecount="4" falsecount="0"/>
+        <line num="46" count="17" type="cond" truecount="1" falsecount="0"/>
         <line num="47" count="2" type="stmt"/>
         <line num="48" count="2" type="stmt"/>
-        <line num="51" count="7" type="stmt"/>
-        <line num="52" count="7" type="stmt"/>
-        <line num="53" count="6" type="stmt"/>
-        <line num="55" count="6" type="cond" truecount="3" falsecount="0"/>
+        <line num="51" count="15" type="stmt"/>
+        <line num="52" count="15" type="stmt"/>
+        <line num="53" count="14" type="stmt"/>
+        <line num="55" count="14" type="cond" truecount="3" falsecount="0"/>
         <line num="56" count="2" type="stmt"/>
         <line num="57" count="2" type="stmt"/>
-        <line num="60" count="4" type="stmt"/>
-        <line num="61" count="4" type="stmt"/>
+        <line num="60" count="12" type="stmt"/>
+        <line num="61" count="12" type="stmt"/>
         <line num="63" count="1" type="stmt"/>
         <line num="74" count="4" type="stmt"/>
         <line num="78" count="1" type="stmt"/>
