@@ -2,13 +2,26 @@ import { Request, Response, NextFunction } from "express";
 import admin from "../config/firebase";
 
 // Extend the Request interface to add the 'user' property
-declare global {
-  namespace Express {
-    interface Request {
-      user?: admin.auth.DecodedIdToken;
-    }
+declare module "express" {
+  export interface Request {
+    user?: admin.auth.DecodedIdToken;
   }
 }
+
+/**
+ * Helper to extract the role safely from custom claims
+ */
+const getUserRole = (decoded: admin.auth.DecodedIdToken): string | undefined => {
+  if ("role" in decoded && typeof decoded.role === "string") {
+    return decoded.role;
+  }
+
+  const claims: admin.auth.DecodedIdToken & {
+    customClaims?: { role?: string };
+  } = decoded;
+
+  return claims.customClaims?.role;
+};
 
 /**
  * Middleware to verify if the authenticated user has one of the allowed roles.
@@ -37,7 +50,7 @@ export const verifyRole = (allowedRoles: string[]) => async (
 
   try {
     const decoded: admin.auth.DecodedIdToken = await admin.auth().verifyIdToken(token);
-    const userRole = decoded.role || (decoded as any).customClaims?.role;
+    const userRole: string | undefined = getUserRole(decoded);
 
     if (!userRole || !allowedRoles.includes(userRole)) {
       res.status(403).json({ error: "Forbidden: insufficient role" });
@@ -71,8 +84,8 @@ export const verifySelfOrAdmin = async (
 
   try {
     const decoded: admin.auth.DecodedIdToken = await admin.auth().verifyIdToken(token);
-    const userRole = decoded.role || (decoded as any).customClaims?.role;
-    const userId = req.params.id;
+    const userRole: string | undefined = getUserRole(decoded);
+    const userId: string = req.params.id;
 
     if (decoded.uid !== userId && userRole !== "Admin") {
       res.status(403).json({ error: "Forbidden: not owner or admin" });
