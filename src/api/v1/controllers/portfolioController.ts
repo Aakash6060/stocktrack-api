@@ -149,3 +149,25 @@ export const setPriceAlert = async (req: Request, res: Response): Promise<void> 
   }
 };
 
+/**
+ * @route DELETE /portfolio/alerts/:id
+ * @description Deletes a price alert by ID.
+ * @access Investor
+ * 
+ * @param {Request} req - Express request with alert ID
+ * @param {Response} res - Express response
+ * 
+ * @returns {Promise<void>} Success or error message
+ */
+export const deletePriceAlert = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const db = admin.firestore();
+
+    await db.collection("alerts").doc(id).delete();
+
+    res.status(200).json({ message: "Price alert deleted" });
+  } catch {
+    res.status(500).json({ error: "Failed to delete alert" });
+  }
+};
