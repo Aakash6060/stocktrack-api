@@ -128,3 +128,26 @@ export const setNotification = async (req: Request, res: Response): Promise<void
       res.status(500).json({ error: "Failed to set notification" });
     }
   };
+
+/**
+ * @route DELETE /notifications/:id
+ * @description Remove a user-specific notification.
+ * @access Investor
+ * 
+ * @param {Request} req - Express request with notification ID
+ * @param {Response} res - Express response object
+ * 
+ * @returns {Promise<void>} Deletion status
+ */
+export const deleteNotification = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { id } = req.params;
+      const db: FirebaseFirestore.Firestore = admin.firestore();
+  
+      await db.collection("notifications").doc(id).delete();
+  
+      res.status(200).json({ message: "Notification deleted" });
+    } catch {
+      res.status(500).json({ error: "Failed to delete notification" });
+    }
+  };
