@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { getCache, setCache } from "../services/cache.service";
 
 /**
  * @route GET /api/v1/stocks/:symbol
@@ -9,15 +10,32 @@ import { Request, Response } from "express";
  */
 export const getStockData = (req: Request<{ symbol: string }>, res: Response): void => {
   const { symbol } = req.params;
+  const cacheKey = `stock_data_${symbol.toLowerCase()}`;
+
+  const cached = getCache(cacheKey);
+  if (cached) {
+    res.status(200).json({
+      ...cached,
+      source: "CACHE",
+    });
+    return;
+  }
 
   try {
     const mockPrice: number = +(100 + Math.random() * 100).toFixed(2);
 
-    res.status(200).json({
+    const response = {
       symbol: symbol.toUpperCase(),
       price: mockPrice,
       currency: "USD",
       timestamp: new Date().toISOString(),
+    };
+
+    setCache(cacheKey, response);
+
+    res.status(200).json({
+      ...response,
+      source: "MOCK",
     });
   } catch {
     res.status(500).json({ error: "Failed to fetch stock data" });
@@ -33,6 +51,16 @@ export const getStockData = (req: Request<{ symbol: string }>, res: Response): v
  */
 export const getStockHistory = (req: Request<{ symbol: string }>, res: Response): void => {
   const { symbol } = req.params;
+  const cacheKey = `stock_history_${symbol.toLowerCase()}`;
+
+  const cached = getCache(cacheKey);
+  if (cached) {
+    res.status(200).json({
+      ...cached,
+      source: "CACHE",
+    });
+    return;
+  }
 
   try {
     if (symbol === "error") {
@@ -45,9 +73,16 @@ export const getStockHistory = (req: Request<{ symbol: string }>, res: Response)
       { date: "2025-04-03", price: 144.8 },
     ];
 
-    res.status(200).json({
+    const response = {
       symbol: symbol.toUpperCase(),
       history: mockHistory,
+    };
+
+    setCache(cacheKey, response);
+
+    res.status(200).json({
+      ...response,
+      source: "MOCK",
     });
   } catch {
     res.status(500).json({ error: "Failed to fetch stock history" });
@@ -63,6 +98,16 @@ export const getStockHistory = (req: Request<{ symbol: string }>, res: Response)
  */
 export const getStockNews = (req: Request<{ symbol: string }>, res: Response): void => {
   const { symbol } = req.params;
+  const cacheKey = `stock_news_${symbol.toLowerCase()}`;
+
+  const cached = getCache(cacheKey);
+  if (cached) {
+    res.status(200).json({
+      ...cached,
+      source: "CACHE",
+    });
+    return;
+  }
 
   try {
     if (symbol === "error") {
@@ -84,9 +129,16 @@ export const getStockNews = (req: Request<{ symbol: string }>, res: Response): v
       },
     ];
 
-    res.status(200).json({
+    const response = {
       symbol: symbol.toUpperCase(),
       news: mockNews,
+    };
+
+    setCache(cacheKey, response);
+
+    res.status(200).json({
+      ...response,
+      source: "MOCK",
     });
   } catch {
     res.status(500).json({ error: "Failed to fetch stock news" });
@@ -98,6 +150,17 @@ export const getStockNews = (req: Request<{ symbol: string }>, res: Response): v
  * @description Returns mock data for current stock market trends.
  */
 export const getMarketTrends = (_req: Request, res: Response): void => {
+  const cacheKey = "stock_market_trends";
+
+  const cached = getCache(cacheKey);
+  if (cached) {
+    res.status(200).json({
+      ...cached,
+      source: "CACHE",
+    });
+    return;
+  }
+
   try {
     const mockTrends: { sector: string; trend: string; changePercent: string }[] = [
       { sector: "Technology", trend: "Up", changePercent: "+1.5%" },
@@ -105,7 +168,14 @@ export const getMarketTrends = (_req: Request, res: Response): void => {
       { sector: "Finance", trend: "Neutral", changePercent: "0.0%" },
     ];
 
-    res.status(200).json({ trends: mockTrends });
+    const response = { trends: mockTrends };
+
+    setCache(cacheKey, response);
+
+    res.status(200).json({
+      ...response,
+      source: "MOCK",
+    });
   } catch {
     res.status(500).json({ error: "Failed to fetch market trends" });
   }
@@ -124,6 +194,16 @@ export const searchStocks = (
   res: Response
 ): void => {
   const query: string = typeof req.query.q === 'string' ? req.query.q.toLowerCase() : '';
+  const cacheKey = `stock_search_${query}`;
+
+  const cached = getCache(cacheKey);
+  if (cached) {
+    res.status(200).json({
+      ...cached,
+      source: "CACHE",
+    });
+    return;
+  }
 
   try {
     const mockStocks: { symbol: string; name: string }[] = [
@@ -139,10 +219,17 @@ export const searchStocks = (
         stock.name.toLowerCase().includes(query)
     );
 
-    res.status(200).json({ results });
+    const response = { results };
+
+    setCache(cacheKey, response);
+
+    res.status(200).json({
+      ...response,
+      source: "MOCK",
+    });
   } catch {
     res.status(500).json({ error: "Failed to set stock alert" });
-  }  
+  }
 };
 
 /**
@@ -151,6 +238,16 @@ export const searchStocks = (
  */
 export const getStockSentiment = (req: Request<{ symbol: string }>, res: Response): void => {
   const { symbol } = req.params;
+  const cacheKey = `stock_sentiment_${symbol.toLowerCase()}`;
+
+  const cached = getCache(cacheKey);
+  if (cached) {
+    res.status(200).json({
+      ...cached,
+      source: "CACHE",
+    });
+    return;
+  }
 
   try {
     const mockSentiment: {
@@ -166,7 +263,12 @@ export const getStockSentiment = (req: Request<{ symbol: string }>, res: Respons
         "Most recent news articles reflect positive sentiment toward the stock.",
     };
 
-    res.status(200).json(mockSentiment);
+    setCache(cacheKey, mockSentiment);
+
+    res.status(200).json({
+      ...mockSentiment,
+      source: "MOCK",
+    });
   } catch {
     res.status(500).json({ error: "Failed to analyze sentiment" });
   }
