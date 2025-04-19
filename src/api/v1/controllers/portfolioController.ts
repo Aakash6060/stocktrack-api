@@ -1,6 +1,16 @@
 import { Request, Response } from "express";
 import admin from "../../../config/firebase";
 
+interface AddStockRequestBody {
+  symbol: string;
+  quantity: number;
+  averageBuyPrice: number;
+}
+
+interface SetAlertRequestBody {
+  symbol: string;
+  targetPrice: number;
+}
 /**
  * @route POST /portfolio/add
  * @description Adds a stock to the user's portfolio.
@@ -15,13 +25,12 @@ import admin from "../../../config/firebase";
  * 
  * @returns {Promise<void>} Responds with a success message or error.
  */
-export const addStockToPortfolio = async (req: Request, res: Response): Promise<void> => {
+export const addStockToPortfolio = async (
+  req: Request<unknown, unknown, AddStockRequestBody>,
+  res: Response
+): Promise<void> => {
   try {
-    const { symbol, quantity, averageBuyPrice } = req.body as {
-      symbol: string;
-      quantity: number;
-      averageBuyPrice: number;
-    };
+    const { symbol, quantity, averageBuyPrice } = req.body;
 
     const db: FirebaseFirestore.Firestore = admin.firestore();
 
@@ -50,12 +59,20 @@ export const addStockToPortfolio = async (req: Request, res: Response): Promise<
 export const getUserPortfolio = async (req: Request, res: Response): Promise<void> => {
   try {
     const db: FirebaseFirestore.Firestore = admin.firestore();
-    const portfolioSnapshot = await db.collection("portfolios").get();
+    const portfolioSnapshot: FirebaseFirestore.QuerySnapshot<FirebaseFirestore.DocumentData> = await db.collection("portfolios").get();
 
-    const portfolio = portfolioSnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+    const portfolio: { id: string; symbol: string; quantity: number; averageBuyPrice: number }[] =
+      portfolioSnapshot.docs.map(doc => {
+        const data: { symbol: string; quantity: number; averageBuyPrice: number } = doc.data() as {
+          symbol: string;
+          quantity: number;
+          averageBuyPrice: number;
+        };
+        return {
+          id: doc.id,
+          ...data
+        };
+      });
 
     res.status(200).json({ portfolio });
   } catch {
@@ -75,17 +92,18 @@ export const getUserPortfolio = async (req: Request, res: Response): Promise<voi
  */
 export const removeStockFromPortfolio = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { symbol } = req.params;
-    const db = admin.firestore();
+    const { symbol } = req.params as { symbol: string };
+    const db: FirebaseFirestore.Firestore = admin.firestore();
 
-    const snapshot = await db.collection("portfolios").where("symbol", "==", symbol).get();
+    const snapshot: FirebaseFirestore.QuerySnapshot<FirebaseFirestore.DocumentData> =
+      await db.collection("portfolios").where("symbol", "==", symbol).get();
 
     if (snapshot.empty) {
-      res.status(404).json({ message: "Stock not found" }); // 🔧 no return
+      res.status(404).json({ message: "Stock not found" });
       return;
     }
 
-    const batch = db.batch();
+    const batch: FirebaseFirestore.WriteBatch = db.batch();
     snapshot.forEach(doc => batch.delete(doc.ref));
     await batch.commit();
 
@@ -104,19 +122,25 @@ export const removeStockFromPortfolio = async (req: Request, res: Response): Pro
  */
 export const getPortfolioPerformance = async (req: Request, res: Response): Promise<void> => {
   try {
-    const db = admin.firestore();
-    const snapshot = await db.collection("portfolios").get();
+    const db: FirebaseFirestore.Firestore = admin.firestore();
+    const snapshot: FirebaseFirestore.QuerySnapshot<FirebaseFirestore.DocumentData> = await db.collection("portfolios").get();
 
-    let totalInvestment = 0;
+    let totalInvestment: number = 0;
     snapshot.forEach(doc => {
-      const data = doc.data();
+      const data: { quantity: number; averageBuyPrice: number } = doc.data() as {
+        quantity: number;
+        averageBuyPrice: number;
+      };
       totalInvestment += data.quantity * data.averageBuyPrice;
     });
 
-    // For now, assume static performance calculation
-    const performance = {
+    const performance: {
+      totalInvestment: number;
+      totalValue: number;
+      returnPercentage: number;
+    } = {
       totalInvestment,
-      totalValue: totalInvestment * 1.1, // Simulate 10% return
+      totalValue: totalInvestment * 1.1,
       returnPercentage: 10
     };
 
@@ -136,11 +160,14 @@ export const getPortfolioPerformance = async (req: Request, res: Response): Prom
  * 
  * @returns {Promise<void>} Success or failure message
  */
-export const setPriceAlert = async (req: Request, res: Response): Promise<void> => {
+export const setPriceAlert = async (
+  req: Request<unknown, unknown, SetAlertRequestBody>,
+  res: Response
+): Promise<void> => {
   try {
     const { symbol, targetPrice } = req.body;
-    const db = admin.firestore();
 
+    const db: FirebaseFirestore.Firestore = admin.firestore();
     await db.collection("alerts").add({ symbol, targetPrice });
 
     res.status(201).json({ message: "Price alert set" });
@@ -161,8 +188,8 @@ export const setPriceAlert = async (req: Request, res: Response): Promise<void> 
  */
 export const deletePriceAlert = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
-    const db = admin.firestore();
+    const { id } = req.params as { id: string };
+    const db: FirebaseFirestore.Firestore = admin.firestore();
 
     await db.collection("alerts").doc(id).delete();
 
