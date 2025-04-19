@@ -125,3 +125,27 @@ export const getPortfolioPerformance = async (req: Request, res: Response): Prom
     res.status(500).json({ error: "Failed to calculate performance" });
   }
 };
+
+/**
+ * @route POST /portfolio/alerts
+ * @description Sets a price alert for a stock.
+ * @access Investor
+ * 
+ * @param {Request} req - Express request with symbol and targetPrice
+ * @param {Response} res - Express response
+ * 
+ * @returns {Promise<void>} Success or failure message
+ */
+export const setPriceAlert = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { symbol, targetPrice } = req.body;
+    const db = admin.firestore();
+
+    await db.collection("alerts").add({ symbol, targetPrice });
+
+    res.status(201).json({ message: "Price alert set" });
+  } catch {
+    res.status(500).json({ error: "Failed to set alert" });
+  }
+};
+
