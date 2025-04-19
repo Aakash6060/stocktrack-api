@@ -36,3 +36,29 @@ export const addStockToPortfolio = async (req: Request, res: Response): Promise<
     res.status(500).json({ error: "Failed to add stock" });
   }
 };
+
+/**
+ * @route GET /portfolio
+ * @description Retrieves the authenticated user's stock portfolio.
+ * @access Investor
+ * 
+ * @param {Request} req - Express request object
+ * @param {Response} res - Express response object
+ * 
+ * @returns {Promise<void>} List of portfolio stocks
+ */
+export const getUserPortfolio = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const db: FirebaseFirestore.Firestore = admin.firestore();
+    const portfolioSnapshot = await db.collection("portfolios").get();
+
+    const portfolio = portfolioSnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+
+    res.status(200).json({ portfolio });
+  } catch {
+    res.status(500).json({ error: "Failed to fetch portfolio" });
+  }
+};
