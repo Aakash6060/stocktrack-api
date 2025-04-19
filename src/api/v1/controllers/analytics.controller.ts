@@ -77,3 +77,26 @@ export const getTopMovers = async (req: Request, res: Response): Promise<void> =
       res.status(500).json({ error: "Failed to fetch top movers" });
     }
   };
+
+/**
+ * @route GET /analytics/user-trends
+ * @description Analyze user portfolio trends.
+ * @access Admin
+ * 
+ * @param {Request} req - Express request object
+ * @param {Response} res - Express response object
+ * 
+ * @returns {Promise<void>} User trend analytics
+ */
+export const getUserTrends = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const db: FirebaseFirestore.Firestore = admin.firestore();
+      const trendsSnapshot = await db.collection("userTrends").get();
+  
+      const trends = trendsSnapshot.docs.map(doc => doc.data());
+  
+      res.status(200).json({ trends });
+    } catch {
+      res.status(500).json({ error: "Failed to fetch user trends" });
+    }
+  };
