@@ -4,6 +4,7 @@
  */
 
 import { getStockData, getStockHistory, getStockNews, getMarketTrends, searchStocks, getStockSentiment, setStockAlert } from "../src/api/v1/controllers/stockController";
+import type { StockAlertBody } from "../src/api/v1/controllers/stockController";
 import { Request, Response } from "express";
 import request from "supertest";
 import app from "../src/app";
@@ -257,7 +258,7 @@ describe("searchStocks", () => {
     await searchStocks(req, res);
 
     expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith({ error: "Failed to search stocks" });
+    expect(res.json).toHaveBeenCalledWith({ error: "Failed to set stock alert" });
   });
 });
 
@@ -346,7 +347,7 @@ describe("setStockAlert", () => {
     const req = {
       params: { symbol: "AAPL" },
       body: {},
-    } as unknown as Request<{ symbol: string }, any, Record<string, never>>;
+    } as unknown as Request<{ symbol: string }, any, Partial<StockAlertBody>>;    
 
     const res = {
       status: jest.fn().mockReturnThis(),

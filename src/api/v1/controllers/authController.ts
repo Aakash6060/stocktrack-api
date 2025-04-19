@@ -62,7 +62,7 @@ export const loginUser = async (
 
   try {
     const result: { data: FirebaseLoginResponse } = await axios.post(
-      `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${process.env.FIREBASE_API_KEY}`,
+      `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${process.env.FIREBASE_API_KEY as string}`,
       { email, password, returnSecureToken: true }
     );
     res.json(result.data);
@@ -75,6 +75,11 @@ export const loginUser = async (
   }
 };
 
+interface SetUserRoleBody {
+  uid: string;
+  role: string;
+}
+
 /**
  * Sets a custom role for a user using Firebase Admin SDK.
  *
@@ -83,7 +88,7 @@ export const loginUser = async (
  * @param res - Express response object
  */
 export const setUserRole = async (
-  req: Request,
+  req: Request<object, object, SetUserRoleBody>,
   res: Response
 ): Promise<void> => {
   const { uid, role } = req.body;
@@ -111,12 +116,17 @@ export const listUsers = async (
   res: Response
 ): Promise<void> => {
   try {
-    const listUsersResult = await admin.auth().listUsers();
-    const users = listUsersResult.users.map((user) => ({
+    const listUsersResult: admin.auth.ListUsersResult = await admin.auth().listUsers();
+    const users: {
+      uid: string;
+      email: string | undefined;
+      displayName: string | undefined;
+      customClaims: admin.auth.UserRecord["customClaims"];
+    }[] = listUsersResult.users.map((user: admin.auth.UserRecord) => ({
       uid: user.uid,
       email: user.email,
       displayName: user.displayName,
-      customClaims: user.customClaims || {},
+      customClaims: user.customClaims ?? {},
     }));
     res.status(200).json({ users });
   } catch (error: unknown) {
@@ -141,12 +151,12 @@ export const getUserById = async (
 ): Promise<void> => {
   const { id } = req.params;
   try {
-    const user = await admin.auth().getUser(id);
+    const user: admin.auth.UserRecord = await admin.auth().getUser(id);
     res.status(200).json({
       uid: user.uid,
       email: user.email,
       displayName: user.displayName,
-      customClaims: user.customClaims || {},
+      customClaims: user.customClaims ?? {},
     });
   } catch (error: unknown) {
     if (error instanceof Error) {

@@ -30,9 +30,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">50% </span>
+                <span class="strong">61.11% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>7/14</span>
+                <span class='fraction'>11/18</span>
             </div>
         
             
@@ -221,9 +221,19 @@
 <a name='L156'></a><a href='#L156'>156</a>
 <a name='L157'></a><a href='#L157'>157</a>
 <a name='L158'></a><a href='#L158'>158</a>
-<a name='L159'></a><a href='#L159'>159</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
+<a name='L159'></a><a href='#L159'>159</a>
+<a name='L160'></a><a href='#L160'>160</a>
+<a name='L161'></a><a href='#L161'>161</a>
+<a name='L162'></a><a href='#L162'>162</a>
+<a name='L163'></a><a href='#L163'>163</a>
+<a name='L164'></a><a href='#L164'>164</a>
+<a name='L165'></a><a href='#L165'>165</a>
+<a name='L166'></a><a href='#L166'>166</a>
+<a name='L167'></a><a href='#L167'>167</a>
+<a name='L168'></a><a href='#L168'>168</a>
+<a name='L169'></a><a href='#L169'>169</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -238,7 +248,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">3x</span>
@@ -277,7 +287,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">3x</span>
@@ -305,7 +315,12 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">3x</span>
@@ -329,12 +344,17 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -358,7 +378,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">3x</span>
@@ -443,7 +463,7 @@ export const loginUser = async (
 &nbsp;
   try {
     const result: { data: FirebaseLoginResponse } = await axios.post(
-      `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${process.env.FIREBASE_API_KEY}`,
+      `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${process.env.FIREBASE_API_KEY as string}`,
       { email, password, returnSecureToken: true }
     );
     res.json(result.data);
@@ -456,6 +476,11 @@ export const loginUser = async (
   }
 };
 &nbsp;
+interface SetUserRoleBody {
+  uid: string;
+  role: string;
+}
+&nbsp;
 /**
  * Sets a custom role for a user using Firebase Admin SDK.
  *
@@ -464,7 +489,7 @@ export const loginUser = async (
  * @param res - Express response object
  */
 export const setUserRole = async (
-  req: Request,
+  req: Request&lt;object, object, SetUserRoleBody&gt;,
   res: Response
 ): Promise&lt;void&gt; =&gt; {
   const { uid, role } = req.body;
@@ -492,12 +517,17 @@ export const listUsers = async (
   res: Response
 ): Promise&lt;void&gt; =&gt; {
   try {
-    const listUsersResult = await admin.auth().listUsers();
-    const users = listUsersResult.users.map((user) =&gt; ({
+    const listUsersResult: admin.auth.ListUsersResult = await admin.auth().listUsers();
+    const users: {
+      uid: string;
+      email: string | undefined;
+      displayName: string | undefined;
+      customClaims: admin.auth.UserRecord["customClaims"];
+    }[] = listUsersResult.users.map((user: admin.auth.UserRecord) =&gt; ({
       uid: user.uid,
       email: user.email,
       displayName: user.displayName,
-      customClaims: user.customClaims || <span class="branch-1 cbranch-no" title="branch not covered" >{},</span>
+      customClaims: user.customClaims ?? <span class="branch-1 cbranch-no" title="branch not covered" >{},</span>
     }));
     res.status(200).json({ users });
   } catch (error: unknown) {
@@ -522,12 +552,12 @@ export const getUserById = async (
 ): Promise&lt;void&gt; =&gt; {
   const { id } = req.params;
   try {
-    const user = await admin.auth().getUser(id);
+    const user: admin.auth.UserRecord = await admin.auth().getUser(id);
     res.status(200).json({
       uid: user.uid,
       email: user.email,
       displayName: user.displayName,
-      customClaims: user.customClaims || <span class="branch-1 cbranch-no" title="branch not covered" >{},</span>
+      customClaims: user.customClaims ?? <span class="branch-1 cbranch-no" title="branch not covered" >{},</span>
     });
   } catch (error: unknown) {
     if (error instanceof Error) {
@@ -544,7 +574,7 @@ export const getUserById = async (
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-04-18T23:00:26.114Z
+                at 2025-04-19T01:12:04.001Z
             </div>
         <script src="../../../../prettify.js"></script>
         <script>
