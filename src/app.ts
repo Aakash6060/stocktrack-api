@@ -6,6 +6,7 @@ import cors from "cors";
 import authRoutes from "./api/v1/routes/auth";
 import stockRoutes from "./api/v1/routes/stock";
 import portfolioRoutes from "./api/v1/routes/portfolio";
+import analyticsRoutes from "./api/v1/routes/analytics"; 
 import { specs, swaggerUi } from './swagger';
 
 /**
@@ -55,6 +56,12 @@ app.use("/api/v1/stocks", stockRoutes);
  * Base path: /api/v1/portfolio
  */
 app.use("/api/v1/portfolio", portfolioRoutes);
+
+/**
+ * Route handler for analytics and reporting endpoints.
+ * Base path: /api/v1/analytics
+ */
+app.use("/api/v1/analytics", analyticsRoutes);
 
 /**
  * Root route to verify API is running.
