@@ -51,3 +51,29 @@ export const getSectorInsights = async (req: Request, res: Response): Promise<vo
       res.status(500).json({ error: "Failed to retrieve sector insights" });
     }
   };  
+
+/**
+ * @route GET /analytics/top-movers
+ * @description Retrieve top gaining and losing stocks.
+ * @access Analyst
+ * 
+ * @param {Request} req - Express request object
+ * @param {Response} res - Express response object
+ * 
+ * @returns {Promise<void>} Top gainers and losers
+ */
+export const getTopMovers = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const db: FirebaseFirestore.Firestore = admin.firestore();
+  
+      const gainersSnap = await db.collection("topMovers").doc("gainers").get();
+      const losersSnap = await db.collection("topMovers").doc("losers").get();
+  
+      res.status(200).json({
+        topGainers: gainersSnap.data(),
+        topLosers: losersSnap.data()
+      });
+    } catch {
+      res.status(500).json({ error: "Failed to fetch top movers" });
+    }
+  };
