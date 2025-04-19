@@ -62,3 +62,35 @@ export const getUserPortfolio = async (req: Request, res: Response): Promise<voi
     res.status(500).json({ error: "Failed to fetch portfolio" });
   }
 };
+
+/**
+ * @route DELETE /portfolio/remove/:symbol
+ * @description Removes a stock from the user's portfolio using the symbol.
+ * @access Investor
+ * 
+ * @param {Request} req - Express request with symbol param
+ * @param {Response} res - Express response
+ * 
+ * @returns {Promise<void>} Deletion result
+ */
+export const removeStockFromPortfolio = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { symbol } = req.params;
+    const db = admin.firestore();
+
+    const snapshot = await db.collection("portfolios").where("symbol", "==", symbol).get();
+
+    if (snapshot.empty) {
+      res.status(404).json({ message: "Stock not found" }); // 🔧 no return
+      return;
+    }
+
+    const batch = db.batch();
+    snapshot.forEach(doc => batch.delete(doc.ref));
+    await batch.commit();
+
+    res.status(200).json({ message: "Stock removed from portfolio" });
+  } catch {
+    res.status(500).json({ error: "Failed to remove stock" });
+  }
+};
