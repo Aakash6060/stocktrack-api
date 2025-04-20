@@ -8,6 +8,7 @@ import type { StockAlertBody } from "../src/api/v1/controllers/stockController";
 import { Request, Response } from "express";
 import request from "supertest";
 import app from "../src/app";
+import { clearCache } from "../src/api/v1/services/cache.service";
 
 // --- Helper Function ---
 
@@ -48,6 +49,7 @@ describe("Stock Controller", () => {
      * Test case: Should return stock data for a valid symbol.
      */
     it("should return stock data", async () => {
+      clearCache("stock_data_aapl");
       const req = createRequest({ symbol: "AAPL" });
 
       const res = {
@@ -63,6 +65,7 @@ describe("Stock Controller", () => {
         price: expect.any(Number),
         currency: "USD",
         timestamp: expect.any(String),
+        source: "MOCK",
       });
     });
 
@@ -70,6 +73,7 @@ describe("Stock Controller", () => {
      * Test case: Should handle error when stock data retrieval fails.
      */
     it("should handle error when fetching stock data fails", async () => {
+      clearCache("stock_data_aapl");
       const req = createRequest({ symbol: "AAPL" });
 
       const res = {
@@ -107,6 +111,7 @@ describe("Stock Controller", () => {
       expect(res.json).toHaveBeenCalledWith({
         symbol: "AAPL",
         history: expect.any(Array),
+        source: "MOCK",
       });
     });
 
@@ -147,6 +152,7 @@ describe("Stock Controller", () => {
       expect(res.json).toHaveBeenCalledWith({
         symbol: "AAPL",
         news: expect.any(Array),
+        source: "MOCK",
       });
     });
 
@@ -185,6 +191,7 @@ describe("getMarketTrends", () => {
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({
       trends: expect.any(Array),
+      source: "MOCK",
     });
   });
 
@@ -235,6 +242,7 @@ describe("searchStocks", () => {
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({
       results: expect.any(Array),
+      source: "MOCK",
     });
   });
 
@@ -242,6 +250,7 @@ describe("searchStocks", () => {
    * Test case: Should handle error when searching fails.
    */
   it("should handle error during stock search", async () => {
+    clearCache("stock_search_apple");
     const req = {
       query: { q: "apple" },
     } as unknown as Request;
@@ -288,6 +297,7 @@ describe("getStockSentiment", () => {
       sentimentScore: expect.any(Number),
       sentiment: "Positive",
       summary: expect.any(String),
+      source: "MOCK",
     });
   });
 
@@ -295,7 +305,7 @@ describe("getStockSentiment", () => {
    * Test case: Should handle sentiment analysis error.
    */
   it("should handle sentiment analysis error", async () => {
-    // simulate error by mocking toUpperCase
+    clearCache("stock_sentiment_aapl");
     const req = createRequest({ symbol: "AAPL" });
 
     const res = {

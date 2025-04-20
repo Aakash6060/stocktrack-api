@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import admin from "../../../config/firebase";
+import { getCache, setCache } from "../services/cache.service";
 
 /**
  * @route GET /analytics/market
@@ -12,13 +13,32 @@ import admin from "../../../config/firebase";
  * @returns {Promise<void>} List of market performance data
  */
 export const getMarketPerformance = async (req: Request, res: Response): Promise<void> => {
+  const cacheKey: string = "analytics_market";
+
+  const cached: unknown = getCache(cacheKey);
+  if (cached) {
+    res.status(200).json({
+      ...cached,
+      source: "CACHE",
+    });
+    return;
+  }
+
   try {
     const db: FirebaseFirestore.Firestore = admin.firestore();
     const snapshot: FirebaseFirestore.QuerySnapshot = await db.collection("marketPerformance").get();
 
     const data: FirebaseFirestore.DocumentData[] = snapshot.docs.map(doc => doc.data());
 
-    res.status(200).json({ data });
+    const response: { data: FirebaseFirestore.DocumentData[] } = { data };
+
+    setCache(cacheKey, response);
+
+    res.status(200).json({
+      ...response,
+      source: "FIRESTORE", 
+    });
+    return;
   } catch {
     res.status(500).json({ error: "Failed to retrieve market performance" });
   }
@@ -35,8 +55,19 @@ export const getMarketPerformance = async (req: Request, res: Response): Promise
  * @returns {Promise<void>} Sector insight data
  */
 export const getSectorInsights = async (req: Request, res: Response): Promise<void> => {
+  const { sector } = req.params;
+  const cacheKey: string = `analytics_sector_${sector}`;
+  
+  const cached: unknown = getCache(cacheKey);
+  if (cached) {
+    res.status(200).json({
+      ...cached,
+      source: "CACHE",
+    });
+    return;
+  } 
+  
   try {
-    const { sector } = req.params;
     const db: FirebaseFirestore.Firestore = admin.firestore();
 
     const snapshot: FirebaseFirestore.DocumentSnapshot = await db.collection("sectors").doc(sector).get();
@@ -46,7 +77,15 @@ export const getSectorInsights = async (req: Request, res: Response): Promise<vo
       return;
     }
 
-    res.status(200).json({ insights: snapshot.data() });
+    const insights: FirebaseFirestore.DocumentData | undefined = snapshot.data();
+    const response: { insights: FirebaseFirestore.DocumentData | undefined } = { insights };
+
+    setCache(cacheKey, response);
+
+    res.status(200).json({
+      ...response,
+      source: "FIRESTORE"
+    });
   } catch {
     res.status(500).json({ error: "Failed to retrieve sector insights" });
   }
@@ -63,15 +102,36 @@ export const getSectorInsights = async (req: Request, res: Response): Promise<vo
  * @returns {Promise<void>} Top gainers and losers
  */
 export const getTopMovers = async (req: Request, res: Response): Promise<void> => {
+  const cacheKey: string = "analytics_top_movers";
+
+  const cached: unknown = getCache(cacheKey);
+  if (cached) {
+    res.status(200).json({
+      ...cached,
+      source: "CACHE",
+    });
+    return;
+  }
+     
   try {
     const db: FirebaseFirestore.Firestore = admin.firestore();
 
     const gainersSnap: FirebaseFirestore.DocumentSnapshot = await db.collection("topMovers").doc("gainers").get();
     const losersSnap: FirebaseFirestore.DocumentSnapshot = await db.collection("topMovers").doc("losers").get();
 
-    res.status(200).json({
+    const response: {
+      topGainers: FirebaseFirestore.DocumentData | undefined,
+      topLosers: FirebaseFirestore.DocumentData | undefined
+    } = {
       topGainers: gainersSnap.data(),
       topLosers: losersSnap.data()
+    };
+
+    setCache(cacheKey, response);
+
+    res.status(200).json({
+      ...response,
+      source: "FIRESTORE"
     });
   } catch {
     res.status(500).json({ error: "Failed to fetch top movers" });
@@ -89,23 +149,41 @@ export const getTopMovers = async (req: Request, res: Response): Promise<void> =
  * @returns {Promise<void>} User trend analytics
  */
 export const getUserTrends = async (req: Request, res: Response): Promise<void> => {
+  const cacheKey: string = "analytics_user_trends";
+
+  const cached: unknown = getCache(cacheKey);
+  if (cached) {
+    res.status(200).json({
+      ...cached,
+      source: "CACHE",
+    });
+    return;
+  }
+
   try {
     const db: FirebaseFirestore.Firestore = admin.firestore();
     const trendsSnapshot: FirebaseFirestore.QuerySnapshot = await db.collection("userTrends").get();
 
     const trends: FirebaseFirestore.DocumentData[] = trendsSnapshot.docs.map(doc => doc.data());
 
-    res.status(200).json({ trends });
+    const response: { trends: FirebaseFirestore.DocumentData[] } = { trends };
+
+    setCache(cacheKey, response);
+
+    res.status(200).json({
+      ...response,
+      source: "FIRESTORE"
+    });
   } catch {
     res.status(500).json({ error: "Failed to fetch user trends" });
   }
 };
 
 interface NotificationInput {
-    userId: string;
-    message: string;
-    trigger: string;
-  }
+  userId: string;
+  message: string;
+  trigger: string;
+}
 
 /**
  * @route POST /notifications
