@@ -1,9 +1,9 @@
 /**
- * @fileoverview Unit tests for Auth Middleware - verifyRole.
+ * @fileoverview Unit tests for Auth Middleware - verifyRole and verifySelfOrAdmin.
  * Tests role-based authorization using mocked Firebase Admin SDK.
  */
 
-import { verifyRole } from "../src/middleware/auth";
+import { verifyRole, verifySelfOrAdmin } from "../src/middleware/auth";
 import admin from "../src/config/firebase";
 import { Request, Response, NextFunction } from "express";
 import request from "supertest";
@@ -87,6 +87,10 @@ describe("Auth Middleware (Integration Tests)", () => {
     res.status(200).json({ message: "Access granted" });
   });
 
+  app.get("/users/:id", verifySelfOrAdmin, (req: Request, res: Response) => {
+    res.status(200).json({ message: "Access granted by self or admin" });
+  });
+
   it("should return 200 if token is valid and role is allowed", async () => {
     const mockVerifyIdToken = admin.auth().verifyIdToken as jest.Mock;
     mockVerifyIdToken.mockResolvedValue({ role: "admin" });
@@ -124,6 +128,55 @@ describe("Auth Middleware (Integration Tests)", () => {
     const res = await request(app)
       .get("/test-protected")
       .set("Authorization", "Bearer invalid-token");
+
+    expect(res.status).toBe(401);
+    expect(res.body).toEqual({ error: "Invalid token" });
+  });
+
+  // --- verifySelfOrAdmin Tests ---
+  it("should return 403 if user is neither self nor admin", async () => {
+    const mockVerifyIdToken = admin.auth().verifyIdToken as jest.Mock;
+    mockVerifyIdToken.mockResolvedValue({ uid: "user123", role: "Investor" });
+
+    const res = await request(app)
+      .get("/users/user456")
+      .set("Authorization", "Bearer valid-token");
+
+    expect(res.status).toBe(403);
+    expect(res.body).toEqual({ error: "Forbidden: not owner or admin" });
+  });
+
+  it("should pass if user is self", async () => {
+    const mockVerifyIdToken = admin.auth().verifyIdToken as jest.Mock;
+    mockVerifyIdToken.mockResolvedValue({ uid: "user123", role: "Investor" });
+
+    const res = await request(app)
+      .get("/users/user123")
+      .set("Authorization", "Bearer valid-token");
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ message: "Access granted by self or admin" });
+  });
+
+  it("should pass if user is admin", async () => {
+    const mockVerifyIdToken = admin.auth().verifyIdToken as jest.Mock;
+    mockVerifyIdToken.mockResolvedValue({ uid: "adminId", role: "Admin" });
+
+    const res = await request(app)
+      .get("/users/any-user")
+      .set("Authorization", "Bearer valid-token");
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ message: "Access granted by self or admin" });
+  });
+
+  it("should return 401 if verifyIdToken throws error in verifySelfOrAdmin", async () => {
+    const mockVerifyIdToken = admin.auth().verifyIdToken as jest.Mock;
+    mockVerifyIdToken.mockRejectedValue(new Error("Bad token"));
+
+    const res = await request(app)
+      .get("/users/some-id")
+      .set("Authorization", "Bearer bad-token");
 
     expect(res.status).toBe(401);
     expect(res.body).toEqual({ error: "Invalid token" });
