@@ -8,6 +8,7 @@ import app from "../src/app";
 import request from "supertest";
 import admin from "../src/config/firebase";
 import { Request, Response } from "express";
+import { clearCache } from "../src/api/v1/services/cache.service";
   
 let mockUserRole: string = "Admin";
 
@@ -66,10 +67,14 @@ jest.mock("../src/config/firebase", () => {
         await getMarketPerformance(req, res);
   
         expect(res.status).toHaveBeenCalledWith(200);
-        expect(res.json).toHaveBeenCalledWith({ data: [{ index: "S&P 500", value: 4200 }] });
+        expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+            data: [{ index: "S&P 500", value: 4200 }],
+            source: "FIRESTORE",
+          }));
       });
   
       it("should handle error on market performance fetch", async () => {
+        clearCache("analytics_market");
         const mockGet = admin.firestore().collection("marketPerformance").get as jest.Mock;
         mockGet.mockRejectedValue(new Error("Firestore error"));
   
@@ -96,7 +101,8 @@ jest.mock("../src/config/firebase", () => {
         await getSectorInsights(req, res);
   
         expect(res.status).toHaveBeenCalledWith(200);
-        expect(res.json).toHaveBeenCalledWith({ insights: mockData });
+        expect(res.json).toHaveBeenCalledWith({ insights: mockData, source: "FIRESTORE",
+        });
       });
   
       it("should return 404 if sector not found", async () => {
@@ -113,6 +119,7 @@ jest.mock("../src/config/firebase", () => {
       });
   
       it("should handle error on sector fetch", async () => {
+        clearCache("analytics_sector_Tech");
         const mockGet = admin.firestore().collection("sectors").doc("Tech").get as jest.Mock;
         mockGet.mockRejectedValue(new Error("Error"));
   
@@ -173,6 +180,7 @@ jest.mock("../src/config/firebase", () => {
             { trend: "buy", count: 10 },
             { trend: "sell", count: 5 },
           ],
+          source: "FIRESTORE",
         });
       });
   
@@ -185,7 +193,9 @@ jest.mock("../src/config/firebase", () => {
   
         const req = {} as Request;
         const res = { status: jest.fn().mockReturnThis(), json: jest.fn() } as unknown as Response;
-  
+
+        clearCache("analytics_user_trends");
+
         await getUserTrends(req, res);
   
         expect(res.status).toHaveBeenCalledWith(500);
@@ -399,6 +409,10 @@ jest.mock("../src/config/firebase", () => {
       });
       
       describe("GET /api/v1/analytics/user-trends", () => {
+        beforeEach(() => {
+            clearCache("analytics_user_trends"); 
+          });
+
         it("should return user trend analytics", async () => {
           mockUserRole = "Admin";
           const mockDocs = [
@@ -420,6 +434,7 @@ jest.mock("../src/config/firebase", () => {
               { trend: "buy", count: 10 },
               { trend: "sell", count: 5 },
             ],
+            source: "FIRESTORE",
           });
         });
       
@@ -427,7 +442,9 @@ jest.mock("../src/config/firebase", () => {
           const mockGet = jest.fn().mockRejectedValue(new Error("Error"));
           const mockCollection = jest.fn(() => ({ get: mockGet }));
           jest.spyOn(admin, "firestore").mockReturnValue({ collection: mockCollection } as any);
-      
+
+          clearCache("analytics_user_trends");
+
           const res = await request(app)
             .get("/api/v1/analytics/user-trends")
             .set("Authorization", "Bearer mockToken");
