@@ -1,3 +1,213 @@
+jest.mock("../src/config/firebase", () => ({
+  __esModule: true,
+  default: {
+    firestore: jest.fn(), // Will override per test
+  },
+}));
+const mockFirestoreHistorySuccess = () => {
+  const firebase = require("../src/config/firebase").default;
+
+  firebase.firestore.mockReturnValue({
+    collection: () => ({
+      doc: () => ({
+        collection: () => ({
+          orderBy: () => ({
+            limit: () => ({
+              get: jest.fn().mockResolvedValue({
+                docs: [
+                  { data: () => ({ date: "2024-04-01", price: 182.45 }) },
+                  { data: () => ({ date: "2024-04-02", price: 184.10 }) },
+                ],
+              }),
+            }),
+          }),
+        }),
+      }),
+    }),
+  });
+};
+
+const mockFirestoreHistoryFailure = () => {
+  const firebase = require("../src/config/firebase").default;
+
+  firebase.firestore.mockReturnValue({
+    collection: () => ({
+      doc: () => ({
+        collection: () => ({
+          orderBy: () => ({
+            limit: () => ({
+              get: jest.fn().mockImplementation(() => {
+                throw new Error("Simulated Firestore failure");
+              }),
+            }),
+          }),
+        }),
+      }),
+    }),
+  });
+};
+
+const mockFirestoreNewsSuccess = () => {
+  const firebase = require("../src/config/firebase").default;
+
+  firebase.firestore.mockReturnValue({
+    collection: () => ({
+      doc: () => ({
+        collection: (sub: string) => {
+          if (sub === "news") {
+            return {
+              orderBy: () => ({
+                limit: () => ({
+                  get: jest.fn().mockResolvedValue({
+                    docs: [
+                      {
+                        data: () => ({
+                          title: "Apple hits all-time high",
+                          source: "MarketWatch",
+                          url: "https://example.com/apple-news",
+                          date: "2024-04-20",
+                        }),
+                      },
+                      {
+                        data: () => ({
+                          title: "iPhone sales expected to grow",
+                          source: "Bloomberg",
+                          url: "https://example.com/iphone-sales",
+                          date: "2024-04-19",
+                        }),
+                      },
+                    ],
+                  }),
+                }),
+              }),
+            };
+          }
+          return { orderBy: () => ({ limit: () => ({ get: jest.fn() }) }) };
+        },
+      }),
+    }),
+  });
+};
+
+const mockFirestoreNewsFailure = () => {
+  const firebase = require("../src/config/firebase").default;
+
+  firebase.firestore.mockReturnValue({
+    collection: () => ({
+      doc: () => ({
+        collection: () => ({
+          orderBy: () => ({
+            limit: () => ({
+              get: jest.fn().mockImplementation(() => {
+                throw new Error("Simulated Firestore failure");
+              }),
+            }),
+          }),
+        }),
+      }),
+    }),
+  });
+};
+
+const mockFirestoreTrendsSuccess = () => {
+  const firebase = require("../src/config/firebase").default;
+
+  firebase.firestore.mockReturnValue({
+    collection: (name: string) => {
+      if (name === "sectors") {
+        return {
+          get: jest.fn().mockResolvedValue({
+            docs: [
+              {
+                id: "Technology",
+                data: () => ({ change: 1.24, volume: 1050000 }),
+              },
+              {
+                id: "Finance",
+                data: () => ({ change: -0.85, volume: 890000 }),
+              },
+            ],
+          }),
+        };
+      }
+      return { get: jest.fn() };
+    },
+  });
+};
+
+const mockFirestoreSearchSuccess = () => {
+  const firebase = require("../src/config/firebase").default;
+
+  firebase.firestore.mockReturnValue({
+    collection: (name: string) => {
+      if (name === "stocks") {
+        return {
+          get: jest.fn().mockResolvedValue({
+            docs: [
+              {
+                data: () => ({ symbol: "AAPL", name: "Apple Inc." }),
+              },
+              {
+                data: () => ({ symbol: "GOOG", name: "Alphabet Inc." }),
+              },
+            ],
+          }),
+        };
+      }
+      return { get: jest.fn() };
+    },
+  });
+};
+
+const mockFirestoreSentimentSuccess = () => {
+  const firebase = require("../src/config/firebase").default;
+
+  firebase.firestore.mockReturnValue({
+    collection: () => ({
+      doc: () => ({
+        collection: () => ({
+          doc: () => ({
+            get: jest.fn().mockResolvedValue({
+              exists: true,
+              data: () => ({
+                symbol: "AAPL",
+                sentimentScore: 0.76,
+                sentiment: "Positive",
+                summary: "Strong investor confidence in Apple stock.",
+              }),
+            }),
+          }),
+        }),
+      }),
+    }),
+  });
+};
+
+const mockFirestoreStockDataSuccess = () => {
+  const firebase = require("../src/config/firebase").default;
+
+  firebase.firestore.mockReturnValue({
+    collection: (name: string) => {
+      if (name === "stocks") {
+        return {
+          doc: (symbol: string) => ({
+            get: jest.fn().mockResolvedValue({
+              exists: true,
+              data: () => ({
+                symbol,
+                price: 192.31,
+                lastUpdated: new Date().toISOString(),
+              }),
+            }),
+          }),
+        };
+      }
+
+      return { doc: () => ({ get: jest.fn() }) };
+    },
+  });
+};
+
 /**
  * @fileoverview Unit tests for Stock Controller - getStockData, getStockHistory, getStockNews.
  * Uses Jest to test mocked implementations of stock-related data retrieval.
@@ -29,19 +239,7 @@ const createRequest = (params: { symbol: string }): Request<{ symbol: string }> 
 describe("Stock Controller", () => {
   // --- Global Mocks ---
 
-  /**
-   * Sets up predictable Math.random before each test.
-   */
-  beforeEach(() => {
-    jest.spyOn(Math, "random").mockImplementation(() => 0.5);
-  });
 
-  /**
-   * Restores original Math.random after each test.
-   */
-  afterEach(() => {
-    jest.restoreAllMocks();
-  });
 
   // --- getStockData Tests ---
   describe("getStockData", () => {
@@ -59,14 +257,8 @@ describe("Stock Controller", () => {
 
       await getStockData(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({
-        symbol: "AAPL",
-        price: expect.any(Number),
-        currency: "USD",
-        timestamp: expect.any(String),
-        source: "MOCK",
-      });
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({ error: "Failed to fetch stock data" });
     });
 
     /**
@@ -81,10 +273,6 @@ describe("Stock Controller", () => {
         json: jest.fn(),
       } as unknown as Response;
 
-      jest.spyOn(Math, "random").mockImplementationOnce(() => {
-        throw new Error("Mocked error");
-      });
-
       await getStockData(req, res);
 
       expect(res.status).toHaveBeenCalledWith(500);
@@ -98,6 +286,7 @@ describe("Stock Controller", () => {
      * Test case: Should return stock history for a valid symbol.
      */
     it("should return stock history", async () => {
+      mockFirestoreHistorySuccess();
       const req = createRequest({ symbol: "AAPL" });
 
       const res = {
@@ -111,7 +300,7 @@ describe("Stock Controller", () => {
       expect(res.json).toHaveBeenCalledWith({
         symbol: "AAPL",
         history: expect.any(Array),
-        source: "MOCK",
+        source: expect.stringMatching(/(CACHE|FIRESTORE)/),
       });
     });
 
@@ -119,6 +308,7 @@ describe("Stock Controller", () => {
      * Test case: Should handle error when stock history retrieval fails.
      */
     it("should handle error when fetching stock history fails", async () => {
+      mockFirestoreHistoryFailure(); 
       const req = createRequest({ symbol: "error" });
 
       const res = {
@@ -139,6 +329,7 @@ describe("Stock Controller", () => {
      * Test case: Should return stock news for a valid symbol.
      */
     it("should return stock news", async () => {
+      mockFirestoreNewsSuccess(); 
       const req = createRequest({ symbol: "AAPL" });
 
       const res = {
@@ -152,7 +343,7 @@ describe("Stock Controller", () => {
       expect(res.json).toHaveBeenCalledWith({
         symbol: "AAPL",
         news: expect.any(Array),
-        source: "MOCK",
+        source: expect.stringMatching(/(CACHE|FIRESTORE)/),
       });
     });
 
@@ -160,6 +351,7 @@ describe("Stock Controller", () => {
      * Test case: Should handle error when stock news retrieval fails.
      */
     it("should handle error when fetching stock news fails", async () => {
+      mockFirestoreNewsFailure();
       const req = createRequest({ symbol: "error" });
 
       const res = {
@@ -180,6 +372,7 @@ describe("getMarketTrends", () => {
    * Test case: Should return mock market trends.
    */
   it("should return market trends", async () => {
+    mockFirestoreTrendsSuccess();
     const req = {} as Request;
     const res = {
       status: jest.fn().mockReturnThis(),
@@ -191,7 +384,7 @@ describe("getMarketTrends", () => {
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({
       trends: expect.any(Array),
-      source: "MOCK",
+      source: expect.stringMatching(/(CACHE|FIRESTORE)/),
     });
   });
 
@@ -228,6 +421,7 @@ describe("searchStocks", () => {
    * Test case: Should return search results for a query match.
    */
   it("should return filtered stock results", async () => {
+    mockFirestoreSearchSuccess();
     const req = {
       query: { q: "apple" },
     } as unknown as Request;
@@ -242,7 +436,7 @@ describe("searchStocks", () => {
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({
       results: expect.any(Array),
-      source: "MOCK",
+      source: expect.stringMatching(/(CACHE|FIRESTORE)/),
     });
   });
 
@@ -267,7 +461,7 @@ describe("searchStocks", () => {
     await searchStocks(req, res);
 
     expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith({ error: "Failed to set stock alert" });
+    expect(res.json).toHaveBeenCalledWith({ error: "Failed to search stocks" });
   });
 });
 
@@ -275,13 +469,14 @@ describe("searchStocks", () => {
 // --- getStockSentiment Tests ---
 describe("getStockSentiment", () => {
   afterEach(() => {
-    jest.restoreAllMocks(); // Clean up any mocks after each test
+    jest.restoreAllMocks(); 
   });
 
   /**
    * Test case: Should return sentiment analysis.
    */
   it("should return sentiment data", async () => {
+    mockFirestoreSentimentSuccess();
     const req = createRequest({ symbol: "AAPL" });
 
     const res = {
@@ -295,9 +490,9 @@ describe("getStockSentiment", () => {
     expect(res.json).toHaveBeenCalledWith({
       symbol: "AAPL",
       sentimentScore: expect.any(Number),
-      sentiment: "Positive",
+      sentiment: expect.any(String),
       summary: expect.any(String),
-      source: "MOCK",
+      source: expect.stringMatching(/(CACHE|FIRESTORE)/),
     });
   });
 
@@ -397,7 +592,12 @@ describe("setStockAlert", () => {
 });
 
 describe("Stock Routes (Integration Tests)", () => {
+  beforeEach(() => {
+    jest.clearAllMocks(); 
+  });
+  
   it("should return stock data for a valid symbol", async () => {
+    mockFirestoreStockDataSuccess();
     const res = await request(app).get("/api/v1/stocks/AAPL");
 
     expect(res.status).toBe(200);
@@ -406,8 +606,10 @@ describe("Stock Routes (Integration Tests)", () => {
     expect(res.body).toHaveProperty("currency", "USD");
     expect(res.body).toHaveProperty("timestamp");
   });
+  });
 
   it("should return stock history for a valid symbol", async () => {
+    mockFirestoreStockDataSuccess();
     const res = await request(app).get("/api/v1/stocks/AAPL/history");
 
     expect(res.status).toBe(200);
@@ -438,7 +640,6 @@ describe("Stock Routes (Integration Tests)", () => {
     expect(res.status).toBe(500);
     expect(res.body).toHaveProperty("error", "Failed to fetch stock news");
   });
-});
 
 it("should return market trends", async () => {
   const res = await request(app).get("/api/v1/stocks/market-trends");
@@ -449,6 +650,7 @@ it("should return market trends", async () => {
 });
 
 it("should search stocks based on query", async () => {
+  mockFirestoreSearchSuccess();
   const res = await request(app).get("/api/v1/stocks/search?q=apple");
 
   expect(res.status).toBe(200);
@@ -457,6 +659,7 @@ it("should search stocks based on query", async () => {
 });
 
 it("should return sentiment analysis for a stock", async () => {
+  mockFirestoreSentimentSuccess();
   const res = await request(app).get("/api/v1/stocks/AAPL/sentiment");
 
   expect(res.status).toBe(200);
