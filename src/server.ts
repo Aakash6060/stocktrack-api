@@ -6,7 +6,7 @@
  */
 
 import app from "./app";
-import { scheduleStockDataFetch } from "./utils/cronJobs/fetchStockData";
+import { scheduleStockDataFetch } from "./utils/cronJobs/fetchData";
 
 // Define the port the server will listen on, defaulting to 3000 if not specified in environment variables
 const PORT: number = parseInt(process.env.PORT || "3000", 10);

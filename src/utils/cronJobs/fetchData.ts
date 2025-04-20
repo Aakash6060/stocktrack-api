@@ -14,14 +14,6 @@ interface FMPQuote {
   timestamp: number;
 }
 
-interface FMPNewsArticle {
-  symbol: string;
-  publishedDate: string;
-  title: string;
-  site: string;
-  url: string;
-}
-
 interface SectorMap {
   [symbol: string]: string;
 }
@@ -43,6 +35,7 @@ const NAME_MAP: NameMap = {
 };
 
 const FMP_API_KEY = process.env.FMP_API_KEY || '';
+const FINNHUB_API_KEY = process.env.FINNHUB_API_KEY || '';
 const STOCK_SYMBOLS = Object.keys(NAME_MAP);
 
 export const scheduleStockDataFetch = () => {
@@ -82,29 +75,33 @@ export const scheduleStockDataFetch = () => {
             price,
           });
 
-        // Add to news subcollection
+        // Add to news and sentiment from Finnhub
         try {
-          const newsUrl = `https://financialmodelingprep.com/api/v3/stock_news?tickers=${symbol}&limit=5&apikey=${FMP_API_KEY}`;
-          const newsResponse = await axios.get<FMPNewsArticle[]>(newsUrl);
-          const newsArticles = newsResponse.data;
+          const newsUrl = `https://finnhub.io/api/v1/company-news?symbol=${symbol}&from=2024-04-01&to=2025-04-20&token=${FINNHUB_API_KEY}`;
+          const newsResponse = await axios.get(newsUrl);
+          const newsArticles = (newsResponse.data as any[]).slice(0, 5) || [];
 
           for (const article of newsArticles) {
+            if (!article.datetime || !article.headline) continue;
+
+            const articleId = new Date(article.datetime * 1000).toISOString();
+
             await db
               .collection('stocks')
               .doc(symbol)
               .collection('news')
-              .doc(article.publishedDate)
+              .doc(articleId)
               .set({
-                title: article.title,
-                source: article.site,
+                title: article.headline,
+                source: article.source,
                 url: article.url,
-                date: article.publishedDate,
+                date: articleId,
               });
           }
 
-          // Analyze sentiment based on top news headline
+          // Analyze sentiment based on top headline
           if (newsArticles.length > 0) {
-            const headline = newsArticles[0].title;
+            const headline = newsArticles[0].headline;
             const sentimentResult = sentiment.analyze(headline);
             const score = sentimentResult.score;
 
