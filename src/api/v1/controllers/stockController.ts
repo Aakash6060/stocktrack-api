@@ -2,11 +2,39 @@ import { Request, Response } from "express";
 import admin from "../../../config/firebase";
 import { getCache, setCache } from "../services/cache.service";
 
+interface StockSearchQuery {
+  q?: string;
+}
+
+export interface StockAlertBody {
+  targetPrice: number;
+}
+
+interface StockData {
+  symbol: string;
+  price: number;
+  lastUpdated: string;
+}
+
+interface HistoryData {
+  date: string;
+  price: number;
+}
+
+interface NewsArticle {
+  title: string;
+  source: string;
+  url: string;
+  date: string;
+}
+
+interface StockDocument {
+  symbol: string;
+  name: string;
+}
+
 /**
  * @route GET /api/v1/stocks/:symbol
- * @description Returns stock data for a given symbol from Firestore.
- * @param req.params.symbol - Stock ticker symbol (e.g., AAPL, GOOGL)
- * @returns JSON object with current stock price and metadata.
  */
 export const getStockData = async (req: Request<{ symbol: string }>, res: Response): Promise<void> => {
   const { symbol } = req.params;
@@ -22,15 +50,15 @@ export const getStockData = async (req: Request<{ symbol: string }>, res: Respon
   }
 
   try {
-    const db = admin.firestore();
-    const doc = await db.collection("stocks").doc(symbol.toUpperCase()).get();
+    const db: FirebaseFirestore.Firestore = admin.firestore();
+    const doc: FirebaseFirestore.DocumentSnapshot = await db.collection("stocks").doc(symbol.toUpperCase()).get();
 
     if (!doc.exists) {
       res.status(404).json({ error: "Stock not found" });
       return;
     }
 
-    const stock = doc.data();
+    const stock: StockData = doc.data() as StockData;
 
     const response: {
       symbol: string;
@@ -38,10 +66,10 @@ export const getStockData = async (req: Request<{ symbol: string }>, res: Respon
       currency: string;
       timestamp: string;
     } = {
-      symbol: stock?.symbol,
-      price: stock?.price,
+      symbol: stock.symbol,
+      price: stock.price,
       currency: "USD",
-      timestamp: stock?.lastUpdated,
+      timestamp: stock.lastUpdated,
     };
 
     setCache(cacheKey, response);
@@ -57,9 +85,6 @@ export const getStockData = async (req: Request<{ symbol: string }>, res: Respon
 
 /**
  * @route GET /api/v1/stocks/:symbol/history
- * @description Returns historical price data for the given stock symbol.
- * @param req.params.symbol - Stock ticker symbol.
- * @returns JSON object containing date-wise stock price history.
  */
 export const getStockHistory = async (req: Request<{ symbol: string }>, res: Response): Promise<void> => {
   const { symbol } = req.params;
@@ -75,8 +100,8 @@ export const getStockHistory = async (req: Request<{ symbol: string }>, res: Res
   }
 
   try {
-    const db = admin.firestore();
-    const snapshot = await db
+    const db: FirebaseFirestore.Firestore = admin.firestore();
+    const snapshot: FirebaseFirestore.QuerySnapshot = await db
       .collection("stocks")
       .doc(symbol.toUpperCase())
       .collection("history")
@@ -84,18 +109,15 @@ export const getStockHistory = async (req: Request<{ symbol: string }>, res: Res
       .limit(30)
       .get();
 
-      const history = snapshot.docs.map(doc => {
-        const data = doc.data();
-        return {
-          date: data.date as string,
-          price: data.price as number,
-        };
-      });
+    const history: HistoryData[] = snapshot.docs.map((doc): HistoryData => {
+      const data: HistoryData = doc.data() as HistoryData;
+      return {
+        date: data.date,
+        price: data.price,
+      };
+    });
 
-    const response: {
-      symbol: string;
-      history: { date: string; price: number }[];
-    } = {
+    const response: { symbol: string; history: HistoryData[] } = {
       symbol: symbol.toUpperCase(),
       history,
     };
@@ -113,9 +135,6 @@ export const getStockHistory = async (req: Request<{ symbol: string }>, res: Res
 
 /**
  * @route GET /api/v1/stocks/:symbol/news
- * @description Returns financial news related to a given stock symbol.
- * @param req.params.symbol - Stock ticker symbol.
- * @returns JSON object containing a list of recent news articles.
  */
 export const getStockNews = async (req: Request<{ symbol: string }>, res: Response): Promise<void> => {
   const { symbol } = req.params;
@@ -131,8 +150,8 @@ export const getStockNews = async (req: Request<{ symbol: string }>, res: Respon
   }
 
   try {
-    const db = admin.firestore();
-    const snapshot = await db
+    const db: FirebaseFirestore.Firestore = admin.firestore();
+    const snapshot: FirebaseFirestore.QuerySnapshot = await db
       .collection("stocks")
       .doc(symbol.toUpperCase())
       .collection("news")
@@ -140,20 +159,17 @@ export const getStockNews = async (req: Request<{ symbol: string }>, res: Respon
       .limit(10)
       .get();
 
-  const news = snapshot.docs.map(doc => {
-    const data = doc.data();
-    return {
-      title: data.title as string,
-      source: data.source as string,
-      url: data.url as string,
-      date: data.date as string,
-    };
-  });
+    const news: NewsArticle[] = snapshot.docs.map((doc): NewsArticle => {
+      const data: NewsArticle = doc.data() as NewsArticle;
+      return {
+        title: data.title,
+        source: data.source,
+        url: data.url,
+        date: data.date,
+      };
+    });
 
-    const response: {
-      symbol: string;
-      news: { title: string; source: string; url: string; date: string }[];
-    } = {
+    const response: { symbol: string; news: NewsArticle[] } = {
       symbol: symbol.toUpperCase(),
       news,
     };
@@ -171,7 +187,6 @@ export const getStockNews = async (req: Request<{ symbol: string }>, res: Respon
 
 /**
  * @route GET /api/v1/stocks/market-trends
- * @description Returns current stock market trends from sector collection.
  */
 export const getMarketTrends = async (_req: Request, res: Response): Promise<void> => {
   const cacheKey: string = "stock_market_trends";
@@ -186,15 +201,15 @@ export const getMarketTrends = async (_req: Request, res: Response): Promise<voi
   }
 
   try {
-    const db = admin.firestore();
-    const snapshot = await db.collection("sectors").get();
+    const db: FirebaseFirestore.Firestore = admin.firestore();
+    const snapshot: FirebaseFirestore.QuerySnapshot = await db.collection("sectors").get();
 
-    const trends = snapshot.docs.map(doc => ({
+    const trends: { sector: string; details: FirebaseFirestore.DocumentData }[] = snapshot.docs.map((doc) => ({
       sector: doc.id,
       details: doc.data(),
     }));
 
-    const response: { trends: { sector: string; details: unknown }[] } = { trends };
+    const response: { trends: { sector: string; details: FirebaseFirestore.DocumentData }[] } = { trends };
 
     setCache(cacheKey, response);
 
@@ -207,13 +222,8 @@ export const getMarketTrends = async (_req: Request, res: Response): Promise<voi
   }
 };
 
-interface StockSearchQuery {
-  q?: string;
-}
-
 /**
  * @route GET /api/v1/stocks/search
- * @description Searches Firestore stock list by symbol or name (case-insensitive).
  */
 export const searchStocks = async (
   req: Request<Record<string, unknown>, unknown, unknown, StockSearchQuery>,
@@ -232,15 +242,15 @@ export const searchStocks = async (
   }
 
   try {
-    const db = admin.firestore();
-    const snapshot = await db.collection("stocks").get();
+    const db: FirebaseFirestore.Firestore = admin.firestore();
+    const snapshot: FirebaseFirestore.QuerySnapshot = await db.collection("stocks").get();
 
-    const results = snapshot.docs
-      .map(doc => doc.data())
+    const results: StockDocument[] = snapshot.docs
+      .map((doc) => doc.data() as StockDocument)
       .filter(
-        stock =>
-          stock.symbol.toLowerCase().includes(query) ||
-          stock.name.toLowerCase().includes(query)
+        (stock: StockDocument) =>
+          (typeof stock.symbol === "string" && stock.symbol.toLowerCase().includes(query)) ||
+          (typeof stock.name === "string" && stock.name.toLowerCase().includes(query))
       );
 
     const response: { results: { symbol: string; name: string }[] } = {
@@ -260,7 +270,6 @@ export const searchStocks = async (
 
 /**
  * @route GET /api/v1/stocks/:symbol/sentiment
- * @description Returns sentiment analysis result for a given stock.
  */
 export const getStockSentiment = async (req: Request<{ symbol: string }>, res: Response): Promise<void> => {
   const { symbol } = req.params;
@@ -276,8 +285,8 @@ export const getStockSentiment = async (req: Request<{ symbol: string }>, res: R
   }
 
   try {
-    const db = admin.firestore();
-    const doc = await db
+    const db: FirebaseFirestore.Firestore = admin.firestore();
+    const doc: FirebaseFirestore.DocumentSnapshot = await db
       .collection("stocks")
       .doc(symbol.toUpperCase())
       .collection("sentiment")
@@ -289,7 +298,7 @@ export const getStockSentiment = async (req: Request<{ symbol: string }>, res: R
       return;
     }
 
-    const sentiment = doc.data();
+    const sentiment: FirebaseFirestore.DocumentData | undefined = doc.data();
 
     setCache(cacheKey, sentiment);
 
@@ -302,13 +311,8 @@ export const getStockSentiment = async (req: Request<{ symbol: string }>, res: R
   }
 };
 
-export interface StockAlertBody {
-  targetPrice: number;
-}
-
 /**
  * @route POST /api/v1/stocks/:symbol/alerts
- * @description Mocks setting a price alert for a given stock (Investor only).
  */
 export const setStockAlert = (
   req: Request<{ symbol: string }, unknown, Partial<StockAlertBody>>,
