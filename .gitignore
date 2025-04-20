@@ -15,3 +15,5 @@ serviceAccountKey.json
 
 # Postaman Collection
 StockTrack API.postman_collection.json
+
+/coverage
