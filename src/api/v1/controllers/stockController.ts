@@ -1,14 +1,14 @@
 import { Request, Response } from "express";
+import admin from "../../../config/firebase";
 import { getCache, setCache } from "../services/cache.service";
 
 /**
  * @route GET /api/v1/stocks/:symbol
- * @description Returns mock stock data for a given symbol.
+ * @description Returns stock data for a given symbol from Firestore.
  * @param req.params.symbol - Stock ticker symbol (e.g., AAPL, GOOGL)
  * @returns JSON object with current stock price and metadata.
- * @note This is a placeholder. Replace with a real-time stock API (e.g., Finnhub, Alpha Vantage) in Milestone 2.
  */
-export const getStockData = (req: Request<{ symbol: string }>, res: Response): void => {
+export const getStockData = async (req: Request<{ symbol: string }>, res: Response): Promise<void> => {
   const { symbol } = req.params;
   const cacheKey: string = `stock_data_${symbol.toLowerCase()}`;
 
@@ -22,7 +22,15 @@ export const getStockData = (req: Request<{ symbol: string }>, res: Response): v
   }
 
   try {
-    const mockPrice: number = +(100 + Math.random() * 100).toFixed(2);
+    const db = admin.firestore();
+    const doc = await db.collection("stocks").doc(symbol.toUpperCase()).get();
+
+    if (!doc.exists) {
+      res.status(404).json({ error: "Stock not found" });
+      return;
+    }
+
+    const stock = doc.data();
 
     const response: {
       symbol: string;
@@ -30,17 +38,17 @@ export const getStockData = (req: Request<{ symbol: string }>, res: Response): v
       currency: string;
       timestamp: string;
     } = {
-      symbol: symbol.toUpperCase(),
-      price: mockPrice,
+      symbol: stock?.symbol,
+      price: stock?.price,
       currency: "USD",
-      timestamp: new Date().toISOString(),
+      timestamp: stock?.lastUpdated,
     };
 
     setCache(cacheKey, response);
 
     res.status(200).json({
       ...response,
-      source: "MOCK",
+      source: "FIRESTORE",
     });
   } catch {
     res.status(500).json({ error: "Failed to fetch stock data" });
@@ -49,12 +57,11 @@ export const getStockData = (req: Request<{ symbol: string }>, res: Response): v
 
 /**
  * @route GET /api/v1/stocks/:symbol/history
- * @description Returns mock historical price data for the given stock symbol.
+ * @description Returns historical price data for the given stock symbol.
  * @param req.params.symbol - Stock ticker symbol.
  * @returns JSON object containing date-wise stock price history.
- * @note Replace with real historical data API integration in Milestone 2.
  */
-export const getStockHistory = (req: Request<{ symbol: string }>, res: Response): void => {
+export const getStockHistory = async (req: Request<{ symbol: string }>, res: Response): Promise<void> => {
   const { symbol } = req.params;
   const cacheKey: string = `stock_history_${symbol.toLowerCase()}`;
 
@@ -68,29 +75,36 @@ export const getStockHistory = (req: Request<{ symbol: string }>, res: Response)
   }
 
   try {
-    if (symbol === "error") {
-      throw new Error("Simulated error");
-    }
+    const db = admin.firestore();
+    const snapshot = await db
+      .collection("stocks")
+      .doc(symbol.toUpperCase())
+      .collection("history")
+      .orderBy("date", "desc")
+      .limit(30)
+      .get();
 
-    const mockHistory: { date: string; price: number }[] = [
-      { date: "2025-04-01", price: 145.5 },
-      { date: "2025-04-02", price: 146.2 },
-      { date: "2025-04-03", price: 144.8 },
-    ];
+      const history = snapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          date: data.date as string,
+          price: data.price as number,
+        };
+      });
 
     const response: {
       symbol: string;
       history: { date: string; price: number }[];
     } = {
       symbol: symbol.toUpperCase(),
-      history: mockHistory,
+      history,
     };
 
     setCache(cacheKey, response);
 
     res.status(200).json({
       ...response,
-      source: "MOCK",
+      source: "FIRESTORE",
     });
   } catch {
     res.status(500).json({ error: "Failed to fetch stock history" });
@@ -99,12 +113,11 @@ export const getStockHistory = (req: Request<{ symbol: string }>, res: Response)
 
 /**
  * @route GET /api/v1/stocks/:symbol/news
- * @description Returns mock financial news related to a given stock symbol.
+ * @description Returns financial news related to a given stock symbol.
  * @param req.params.symbol - Stock ticker symbol.
  * @returns JSON object containing a list of recent news articles.
- * @note Replace with integration from a financial news API (e.g., NewsAPI, Finnhub) in Milestone 2.
  */
-export const getStockNews = (req: Request<{ symbol: string }>, res: Response): void => {
+export const getStockNews = async (req: Request<{ symbol: string }>, res: Response): Promise<void> => {
   const { symbol } = req.params;
   const cacheKey: string = `stock_news_${symbol.toLowerCase()}`;
 
@@ -118,38 +131,38 @@ export const getStockNews = (req: Request<{ symbol: string }>, res: Response): v
   }
 
   try {
-    if (symbol === "error") {
-      throw new Error("Simulated error");
-    }
+    const db = admin.firestore();
+    const snapshot = await db
+      .collection("stocks")
+      .doc(symbol.toUpperCase())
+      .collection("news")
+      .orderBy("date", "desc")
+      .limit(10)
+      .get();
 
-    const mockNews: { title: string; source: string; url: string; date: string }[] = [
-      {
-        title: "Apple announces new iPhone",
-        source: "TechCrunch",
-        url: "https://techcrunch.com/apple-new-iphone",
-        date: "2025-04-03",
-      },
-      {
-        title: "Apple stock surges after strong earnings",
-        source: "CNBC",
-        url: "https://cnbc.com/apple-stock-surges",
-        date: "2025-04-02",
-      },
-    ];
+  const news = snapshot.docs.map(doc => {
+    const data = doc.data();
+    return {
+      title: data.title as string,
+      source: data.source as string,
+      url: data.url as string,
+      date: data.date as string,
+    };
+  });
 
     const response: {
       symbol: string;
       news: { title: string; source: string; url: string; date: string }[];
     } = {
       symbol: symbol.toUpperCase(),
-      news: mockNews,
+      news,
     };
 
     setCache(cacheKey, response);
 
     res.status(200).json({
       ...response,
-      source: "MOCK",
+      source: "FIRESTORE",
     });
   } catch {
     res.status(500).json({ error: "Failed to fetch stock news" });
@@ -158,9 +171,9 @@ export const getStockNews = (req: Request<{ symbol: string }>, res: Response): v
 
 /**
  * @route GET /api/v1/stocks/market-trends
- * @description Returns mock data for current stock market trends.
+ * @description Returns current stock market trends from sector collection.
  */
-export const getMarketTrends = (_req: Request, res: Response): void => {
+export const getMarketTrends = async (_req: Request, res: Response): Promise<void> => {
   const cacheKey: string = "stock_market_trends";
 
   const cached: unknown = getCache(cacheKey);
@@ -173,21 +186,21 @@ export const getMarketTrends = (_req: Request, res: Response): void => {
   }
 
   try {
-    const mockTrends: { sector: string; trend: string; changePercent: string }[] = [
-      { sector: "Technology", trend: "Up", changePercent: "+1.5%" },
-      { sector: "Healthcare", trend: "Down", changePercent: "-0.8%" },
-      { sector: "Finance", trend: "Neutral", changePercent: "0.0%" },
-    ];
+    const db = admin.firestore();
+    const snapshot = await db.collection("sectors").get();
 
-    const response: { trends: { sector: string; trend: string; changePercent: string }[] } = {
-      trends: mockTrends,
-    };
+    const trends = snapshot.docs.map(doc => ({
+      sector: doc.id,
+      details: doc.data(),
+    }));
+
+    const response: { trends: { sector: string; details: unknown }[] } = { trends };
 
     setCache(cacheKey, response);
 
     res.status(200).json({
       ...response,
-      source: "MOCK",
+      source: "FIRESTORE",
     });
   } catch {
     res.status(500).json({ error: "Failed to fetch market trends" });
@@ -200,13 +213,13 @@ interface StockSearchQuery {
 
 /**
  * @route GET /api/v1/stocks/search
- * @description Searches mock stock list by symbol or name (case-insensitive).
+ * @description Searches Firestore stock list by symbol or name (case-insensitive).
  */
-export const searchStocks = (
+export const searchStocks = async (
   req: Request<Record<string, unknown>, unknown, unknown, StockSearchQuery>,
   res: Response
-): void => {
-  const query: string = typeof req.query.q === 'string' ? req.query.q.toLowerCase() : '';
+): Promise<void> => {
+  const query: string = typeof req.query.q === "string" ? req.query.q.toLowerCase() : "";
   const cacheKey: string = `stock_search_${query}`;
 
   const cached: unknown = getCache(cacheKey);
@@ -219,37 +232,37 @@ export const searchStocks = (
   }
 
   try {
-    const mockStocks: { symbol: string; name: string }[] = [
-      { symbol: "AAPL", name: "Apple Inc." },
-      { symbol: "GOOGL", name: "Alphabet Inc." },
-      { symbol: "TSLA", name: "Tesla Inc." },
-      { symbol: "AMZN", name: "Amazon.com Inc." },
-    ];
+    const db = admin.firestore();
+    const snapshot = await db.collection("stocks").get();
 
-    const results: { symbol: string; name: string }[] = mockStocks.filter(
-      (stock) =>
-        stock.symbol.toLowerCase().includes(query) ||
-        stock.name.toLowerCase().includes(query)
-    );
+    const results = snapshot.docs
+      .map(doc => doc.data())
+      .filter(
+        stock =>
+          stock.symbol.toLowerCase().includes(query) ||
+          stock.name.toLowerCase().includes(query)
+      );
 
-    const response: { results: { symbol: string; name: string }[] } = { results };
+    const response: { results: { symbol: string; name: string }[] } = {
+      results: results.map(({ symbol, name }) => ({ symbol, name })),
+    };
 
     setCache(cacheKey, response);
 
     res.status(200).json({
       ...response,
-      source: "MOCK",
+      source: "FIRESTORE",
     });
   } catch {
-    res.status(500).json({ error: "Failed to set stock alert" });
+    res.status(500).json({ error: "Failed to search stocks" });
   }
 };
 
 /**
  * @route GET /api/v1/stocks/:symbol/sentiment
- * @description Returns mock sentiment analysis result for a given stock.
+ * @description Returns sentiment analysis result for a given stock.
  */
-export const getStockSentiment = (req: Request<{ symbol: string }>, res: Response): void => {
+export const getStockSentiment = async (req: Request<{ symbol: string }>, res: Response): Promise<void> => {
   const { symbol } = req.params;
   const cacheKey: string = `stock_sentiment_${symbol.toLowerCase()}`;
 
@@ -263,24 +276,26 @@ export const getStockSentiment = (req: Request<{ symbol: string }>, res: Respons
   }
 
   try {
-    const mockSentiment: {
-      symbol: string;
-      sentimentScore: number;
-      sentiment: string;
-      summary: string;
-    } = {
-      symbol: symbol.toUpperCase(),
-      sentimentScore: 0.78,
-      sentiment: "Positive",
-      summary:
-        "Most recent news articles reflect positive sentiment toward the stock.",
-    };
+    const db = admin.firestore();
+    const doc = await db
+      .collection("stocks")
+      .doc(symbol.toUpperCase())
+      .collection("sentiment")
+      .doc("latest")
+      .get();
 
-    setCache(cacheKey, mockSentiment);
+    if (!doc.exists) {
+      res.status(404).json({ error: "Sentiment not found" });
+      return;
+    }
+
+    const sentiment = doc.data();
+
+    setCache(cacheKey, sentiment);
 
     res.status(200).json({
-      ...mockSentiment,
-      source: "MOCK",
+      ...sentiment,
+      source: "FIRESTORE",
     });
   } catch {
     res.status(500).json({ error: "Failed to analyze sentiment" });
