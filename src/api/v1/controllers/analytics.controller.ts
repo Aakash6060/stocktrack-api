@@ -13,24 +13,24 @@ import { getCache, setCache } from "../services/cache.service";
  * @returns {Promise<void>} List of market performance data
  */
 export const getMarketPerformance = async (req: Request, res: Response): Promise<void> => {
-    const cacheKey = "analytics_market";
+  const cacheKey: string = "analytics_market";
 
-    const cached = getCache(cacheKey);
-    if (cached) {
-        res.status(200).json({
-          ...cached,
-          source: "CACHE",
-        });
-        return;
-      }
+  const cached: unknown = getCache(cacheKey);
+  if (cached) {
+    res.status(200).json({
+      ...cached,
+      source: "CACHE",
+    });
+    return;
+  }
 
-    try {
+  try {
     const db: FirebaseFirestore.Firestore = admin.firestore();
     const snapshot: FirebaseFirestore.QuerySnapshot = await db.collection("marketPerformance").get();
 
     const data: FirebaseFirestore.DocumentData[] = snapshot.docs.map(doc => doc.data());
 
-    const response = { data };
+    const response: { data: FirebaseFirestore.DocumentData[] } = { data };
 
     setCache(cacheKey, response);
 
@@ -55,19 +55,19 @@ export const getMarketPerformance = async (req: Request, res: Response): Promise
  * @returns {Promise<void>} Sector insight data
  */
 export const getSectorInsights = async (req: Request, res: Response): Promise<void> => {
-    const { sector } = req.params;
-    const cacheKey = `analytics_sector_${sector}`;
+  const { sector } = req.params;
+  const cacheKey: string = `analytics_sector_${sector}`;
   
-    const cached = getCache(cacheKey);
-    if (cached) {
-      res.status(200).json({
-        ...cached,
-        source: "CACHE",
-      });
-      return;
-    } 
+  const cached: unknown = getCache(cacheKey);
+  if (cached) {
+    res.status(200).json({
+      ...cached,
+      source: "CACHE",
+    });
+    return;
+  } 
   
-    try {
+  try {
     const db: FirebaseFirestore.Firestore = admin.firestore();
 
     const snapshot: FirebaseFirestore.DocumentSnapshot = await db.collection("sectors").doc(sector).get();
@@ -77,8 +77,8 @@ export const getSectorInsights = async (req: Request, res: Response): Promise<vo
       return;
     }
 
-    const insights = snapshot.data();
-    const response = { insights };
+    const insights: FirebaseFirestore.DocumentData | undefined = snapshot.data();
+    const response: { insights: FirebaseFirestore.DocumentData | undefined } = { insights };
 
     setCache(cacheKey, response);
 
@@ -102,39 +102,41 @@ export const getSectorInsights = async (req: Request, res: Response): Promise<vo
  * @returns {Promise<void>} Top gainers and losers
  */
 export const getTopMovers = async (req: Request, res: Response): Promise<void> => {
-    const cacheKey = "analytics_top_movers";
+  const cacheKey: string = "analytics_top_movers";
 
-    const cached = getCache(cacheKey);
-    if (cached) {
-      res.status(200).json({
-        ...cached,
-        source: "CACHE",
-      });
-      return;
-    }
-       
+  const cached: unknown = getCache(cacheKey);
+  if (cached) {
+    res.status(200).json({
+      ...cached,
+      source: "CACHE",
+    });
+    return;
+  }
+     
   try {
     const db: FirebaseFirestore.Firestore = admin.firestore();
 
     const gainersSnap: FirebaseFirestore.DocumentSnapshot = await db.collection("topMovers").doc("gainers").get();
     const losersSnap: FirebaseFirestore.DocumentSnapshot = await db.collection("topMovers").doc("losers").get();
 
+    const response: {
+      topGainers: FirebaseFirestore.DocumentData | undefined,
+      topLosers: FirebaseFirestore.DocumentData | undefined
+    } = {
+      topGainers: gainersSnap.data(),
+      topLosers: losersSnap.data()
+    };
 
-    const response = {
-        topGainers: gainersSnap.data(),
-        topLosers: losersSnap.data()
-      };
-  
-      setCache(cacheKey, response);
-  
-      res.status(200).json({
-        ...response,
-        source: "FIRESTORE"
-      });
-    } catch {
-      res.status(500).json({ error: "Failed to fetch top movers" });
-    }
-  };
+    setCache(cacheKey, response);
+
+    res.status(200).json({
+      ...response,
+      source: "FIRESTORE"
+    });
+  } catch {
+    res.status(500).json({ error: "Failed to fetch top movers" });
+  }
+};
 
 /**
  * @route GET /analytics/user-trends
@@ -147,16 +149,16 @@ export const getTopMovers = async (req: Request, res: Response): Promise<void> =
  * @returns {Promise<void>} User trend analytics
  */
 export const getUserTrends = async (req: Request, res: Response): Promise<void> => {
-    const cacheKey = "analytics_user_trends";
+  const cacheKey: string = "analytics_user_trends";
 
-    const cached = getCache(cacheKey);
-    if (cached) {
-      res.status(200).json({
-        ...cached,
-        source: "CACHE",
-      });
-      return;
-    }
+  const cached: unknown = getCache(cacheKey);
+  if (cached) {
+    res.status(200).json({
+      ...cached,
+      source: "CACHE",
+    });
+    return;
+  }
 
   try {
     const db: FirebaseFirestore.Firestore = admin.firestore();
@@ -164,7 +166,7 @@ export const getUserTrends = async (req: Request, res: Response): Promise<void> 
 
     const trends: FirebaseFirestore.DocumentData[] = trendsSnapshot.docs.map(doc => doc.data());
 
-    const response = { trends };
+    const response: { trends: FirebaseFirestore.DocumentData[] } = { trends };
 
     setCache(cacheKey, response);
 
@@ -178,10 +180,10 @@ export const getUserTrends = async (req: Request, res: Response): Promise<void> 
 };
 
 interface NotificationInput {
-    userId: string;
-    message: string;
-    trigger: string;
-  }
+  userId: string;
+  message: string;
+  trigger: string;
+}
 
 /**
  * @route POST /notifications

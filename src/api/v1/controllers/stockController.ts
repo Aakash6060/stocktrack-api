@@ -10,9 +10,9 @@ import { getCache, setCache } from "../services/cache.service";
  */
 export const getStockData = (req: Request<{ symbol: string }>, res: Response): void => {
   const { symbol } = req.params;
-  const cacheKey = `stock_data_${symbol.toLowerCase()}`;
+  const cacheKey: string = `stock_data_${symbol.toLowerCase()}`;
 
-  const cached = getCache(cacheKey);
+  const cached: unknown = getCache(cacheKey);
   if (cached) {
     res.status(200).json({
       ...cached,
@@ -24,7 +24,12 @@ export const getStockData = (req: Request<{ symbol: string }>, res: Response): v
   try {
     const mockPrice: number = +(100 + Math.random() * 100).toFixed(2);
 
-    const response = {
+    const response: {
+      symbol: string;
+      price: number;
+      currency: string;
+      timestamp: string;
+    } = {
       symbol: symbol.toUpperCase(),
       price: mockPrice,
       currency: "USD",
@@ -51,9 +56,9 @@ export const getStockData = (req: Request<{ symbol: string }>, res: Response): v
  */
 export const getStockHistory = (req: Request<{ symbol: string }>, res: Response): void => {
   const { symbol } = req.params;
-  const cacheKey = `stock_history_${symbol.toLowerCase()}`;
+  const cacheKey: string = `stock_history_${symbol.toLowerCase()}`;
 
-  const cached = getCache(cacheKey);
+  const cached: unknown = getCache(cacheKey);
   if (cached) {
     res.status(200).json({
       ...cached,
@@ -73,7 +78,10 @@ export const getStockHistory = (req: Request<{ symbol: string }>, res: Response)
       { date: "2025-04-03", price: 144.8 },
     ];
 
-    const response = {
+    const response: {
+      symbol: string;
+      history: { date: string; price: number }[];
+    } = {
       symbol: symbol.toUpperCase(),
       history: mockHistory,
     };
@@ -98,9 +106,9 @@ export const getStockHistory = (req: Request<{ symbol: string }>, res: Response)
  */
 export const getStockNews = (req: Request<{ symbol: string }>, res: Response): void => {
   const { symbol } = req.params;
-  const cacheKey = `stock_news_${symbol.toLowerCase()}`;
+  const cacheKey: string = `stock_news_${symbol.toLowerCase()}`;
 
-  const cached = getCache(cacheKey);
+  const cached: unknown = getCache(cacheKey);
   if (cached) {
     res.status(200).json({
       ...cached,
@@ -129,7 +137,10 @@ export const getStockNews = (req: Request<{ symbol: string }>, res: Response): v
       },
     ];
 
-    const response = {
+    const response: {
+      symbol: string;
+      news: { title: string; source: string; url: string; date: string }[];
+    } = {
       symbol: symbol.toUpperCase(),
       news: mockNews,
     };
@@ -150,9 +161,9 @@ export const getStockNews = (req: Request<{ symbol: string }>, res: Response): v
  * @description Returns mock data for current stock market trends.
  */
 export const getMarketTrends = (_req: Request, res: Response): void => {
-  const cacheKey = "stock_market_trends";
+  const cacheKey: string = "stock_market_trends";
 
-  const cached = getCache(cacheKey);
+  const cached: unknown = getCache(cacheKey);
   if (cached) {
     res.status(200).json({
       ...cached,
@@ -168,7 +179,9 @@ export const getMarketTrends = (_req: Request, res: Response): void => {
       { sector: "Finance", trend: "Neutral", changePercent: "0.0%" },
     ];
 
-    const response = { trends: mockTrends };
+    const response: { trends: { sector: string; trend: string; changePercent: string }[] } = {
+      trends: mockTrends,
+    };
 
     setCache(cacheKey, response);
 
@@ -194,9 +207,9 @@ export const searchStocks = (
   res: Response
 ): void => {
   const query: string = typeof req.query.q === 'string' ? req.query.q.toLowerCase() : '';
-  const cacheKey = `stock_search_${query}`;
+  const cacheKey: string = `stock_search_${query}`;
 
-  const cached = getCache(cacheKey);
+  const cached: unknown = getCache(cacheKey);
   if (cached) {
     res.status(200).json({
       ...cached,
@@ -219,7 +232,7 @@ export const searchStocks = (
         stock.name.toLowerCase().includes(query)
     );
 
-    const response = { results };
+    const response: { results: { symbol: string; name: string }[] } = { results };
 
     setCache(cacheKey, response);
 
@@ -238,9 +251,9 @@ export const searchStocks = (
  */
 export const getStockSentiment = (req: Request<{ symbol: string }>, res: Response): void => {
   const { symbol } = req.params;
-  const cacheKey = `stock_sentiment_${symbol.toLowerCase()}`;
+  const cacheKey: string = `stock_sentiment_${symbol.toLowerCase()}`;
 
-  const cached = getCache(cacheKey);
+  const cached: unknown = getCache(cacheKey);
   if (cached) {
     res.status(200).json({
       ...cached,

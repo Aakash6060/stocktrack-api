@@ -299,7 +299,9 @@
 <a name='L234'></a><a href='#L234'>234</a>
 <a name='L235'></a><a href='#L235'>235</a>
 <a name='L236'></a><a href='#L236'>236</a>
-<a name='L237'></a><a href='#L237'>237</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L237'></a><a href='#L237'>237</a>
+<a name='L238'></a><a href='#L238'>238</a>
+<a name='L239'></a><a href='#L239'>239</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -419,6 +421,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
@@ -550,24 +554,24 @@ import { getCache, setCache } from "../services/cache.service";
  * @returns {Promise&lt;void&gt;} List of market performance data
  */
 export const getMarketPerformance = async (req: Request, res: Response): Promise&lt;void&gt; =&gt; {
-    const cacheKey = "analytics_market";
+  const cacheKey: string = "analytics_market";
 &nbsp;
-    const cached = getCache(cacheKey);
-    <span class="missing-if-branch" title="if path not taken" >I</span>if (cached) {
-<span class="cstat-no" title="statement not covered" >        res.status(200).json({</span>
-          ...cached,
-          source: "CACHE",
-        });
-<span class="cstat-no" title="statement not covered" >        return;</span>
-      }
+  const cached: unknown = getCache(cacheKey);
+  <span class="missing-if-branch" title="if path not taken" >I</span>if (cached) {
+<span class="cstat-no" title="statement not covered" >    res.status(200).json({</span>
+      ...cached,
+      source: "CACHE",
+    });
+<span class="cstat-no" title="statement not covered" >    return;</span>
+  }
 &nbsp;
-    try {
+  try {
     const db: FirebaseFirestore.Firestore = admin.firestore();
     const snapshot: FirebaseFirestore.QuerySnapshot = await db.collection("marketPerformance").get();
 &nbsp;
     const data: FirebaseFirestore.DocumentData[] = snapshot.docs.map(doc =&gt; doc.data());
 &nbsp;
-    const response = { data };
+    const response: { data: FirebaseFirestore.DocumentData[] } = { data };
 &nbsp;
     setCache(cacheKey, response);
 &nbsp;
@@ -592,19 +596,19 @@ export const getMarketPerformance = async (req: Request, res: Response): Promise
  * @returns {Promise&lt;void&gt;} Sector insight data
  */
 export const getSectorInsights = async (req: Request, res: Response): Promise&lt;void&gt; =&gt; {
-    const { sector } = req.params;
-    const cacheKey = `analytics_sector_${sector}`;
+  const { sector } = req.params;
+  const cacheKey: string = `analytics_sector_${sector}`;
   
-    const cached = getCache(cacheKey);
-    <span class="missing-if-branch" title="if path not taken" >I</span>if (cached) {
-<span class="cstat-no" title="statement not covered" >      res.status(200).json({</span>
-        ...cached,
-        source: "CACHE",
-      });
-<span class="cstat-no" title="statement not covered" >      return;</span>
-    } 
+  const cached: unknown = getCache(cacheKey);
+  <span class="missing-if-branch" title="if path not taken" >I</span>if (cached) {
+<span class="cstat-no" title="statement not covered" >    res.status(200).json({</span>
+      ...cached,
+      source: "CACHE",
+    });
+<span class="cstat-no" title="statement not covered" >    return;</span>
+  } 
   
-    try {
+  try {
     const db: FirebaseFirestore.Firestore = admin.firestore();
 &nbsp;
     const snapshot: FirebaseFirestore.DocumentSnapshot = await db.collection("sectors").doc(sector).get();
@@ -614,8 +618,8 @@ export const getSectorInsights = async (req: Request, res: Response): Promise&lt
       return;
     }
 &nbsp;
-    const insights = snapshot.data();
-    const response = { insights };
+    const insights: FirebaseFirestore.DocumentData | undefined = snapshot.data();
+    const response: { insights: FirebaseFirestore.DocumentData | undefined } = { insights };
 &nbsp;
     setCache(cacheKey, response);
 &nbsp;
@@ -639,39 +643,41 @@ export const getSectorInsights = async (req: Request, res: Response): Promise&lt
  * @returns {Promise&lt;void&gt;} Top gainers and losers
  */
 export const getTopMovers = async (req: Request, res: Response): Promise&lt;void&gt; =&gt; {
-    const cacheKey = "analytics_top_movers";
+  const cacheKey: string = "analytics_top_movers";
 &nbsp;
-    const cached = getCache(cacheKey);
-    <span class="missing-if-branch" title="if path not taken" >I</span>if (cached) {
-<span class="cstat-no" title="statement not covered" >      res.status(200).json({</span>
-        ...cached,
-        source: "CACHE",
-      });
-<span class="cstat-no" title="statement not covered" >      return;</span>
-    }
-       
+  const cached: unknown = getCache(cacheKey);
+  <span class="missing-if-branch" title="if path not taken" >I</span>if (cached) {
+<span class="cstat-no" title="statement not covered" >    res.status(200).json({</span>
+      ...cached,
+      source: "CACHE",
+    });
+<span class="cstat-no" title="statement not covered" >    return;</span>
+  }
+     
   try {
     const db: FirebaseFirestore.Firestore = admin.firestore();
 &nbsp;
     const gainersSnap: FirebaseFirestore.DocumentSnapshot = await db.collection("topMovers").doc("gainers").get();
     const losersSnap: FirebaseFirestore.DocumentSnapshot = await db.collection("topMovers").doc("losers").get();
 &nbsp;
+    const response: {
+      topGainers: FirebaseFirestore.DocumentData | undefined,
+      topLosers: FirebaseFirestore.DocumentData | undefined
+    } = {
+      topGainers: gainersSnap.data(),
+      topLosers: losersSnap.data()
+    };
 &nbsp;
-    const response = {
-        topGainers: gainersSnap.data(),
-        topLosers: losersSnap.data()
-      };
-  
-      setCache(cacheKey, response);
-  
-      res.status(200).json({
-        ...response,
-        source: "FIRESTORE"
-      });
-    } catch {
-      res.status(500).json({ error: "Failed to fetch top movers" });
-    }
-  };
+    setCache(cacheKey, response);
+&nbsp;
+    res.status(200).json({
+      ...response,
+      source: "FIRESTORE"
+    });
+  } catch {
+    res.status(500).json({ error: "Failed to fetch top movers" });
+  }
+};
 &nbsp;
 /**
  * @route GET /analytics/user-trends
@@ -684,16 +690,16 @@ export const getTopMovers = async (req: Request, res: Response): Promise&lt;void
  * @returns {Promise&lt;void&gt;} User trend analytics
  */
 export const getUserTrends = async (req: Request, res: Response): Promise&lt;void&gt; =&gt; {
-    const cacheKey = "analytics_user_trends";
+  const cacheKey: string = "analytics_user_trends";
 &nbsp;
-    const cached = getCache(cacheKey);
-    <span class="missing-if-branch" title="if path not taken" >I</span>if (cached) {
-<span class="cstat-no" title="statement not covered" >      res.status(200).json({</span>
-        ...cached,
-        source: "CACHE",
-      });
-<span class="cstat-no" title="statement not covered" >      return;</span>
-    }
+  const cached: unknown = getCache(cacheKey);
+  <span class="missing-if-branch" title="if path not taken" >I</span>if (cached) {
+<span class="cstat-no" title="statement not covered" >    res.status(200).json({</span>
+      ...cached,
+      source: "CACHE",
+    });
+<span class="cstat-no" title="statement not covered" >    return;</span>
+  }
 &nbsp;
   try {
     const db: FirebaseFirestore.Firestore = admin.firestore();
@@ -701,7 +707,7 @@ export const getUserTrends = async (req: Request, res: Response): Promise&lt;voi
 &nbsp;
     const trends: FirebaseFirestore.DocumentData[] = trendsSnapshot.docs.map(doc =&gt; doc.data());
 &nbsp;
-    const response = { trends };
+    const response: { trends: FirebaseFirestore.DocumentData[] } = { trends };
 &nbsp;
     setCache(cacheKey, response);
 &nbsp;
@@ -715,10 +721,10 @@ export const getUserTrends = async (req: Request, res: Response): Promise&lt;voi
 };
 &nbsp;
 interface NotificationInput {
-    userId: string;
-    message: string;
-    trigger: string;
-  }
+  userId: string;
+  message: string;
+  trigger: string;
+}
 &nbsp;
 /**
  * @route POST /notifications
@@ -778,7 +784,7 @@ export const deleteNotification = async (req: Request, res: Response): Promise&l
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-04-20T00:39:35.053Z
+                at 2025-04-20T00:45:56.255Z
             </div>
         <script src="../../../../prettify.js"></script>
         <script>

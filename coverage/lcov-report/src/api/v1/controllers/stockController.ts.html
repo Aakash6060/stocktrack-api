@@ -369,7 +369,20 @@
 <a name='L304'></a><a href='#L304'>304</a>
 <a name='L305'></a><a href='#L305'>305</a>
 <a name='L306'></a><a href='#L306'>306</a>
-<a name='L307'></a><a href='#L307'>307</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L307'></a><a href='#L307'>307</a>
+<a name='L308'></a><a href='#L308'>308</a>
+<a name='L309'></a><a href='#L309'>309</a>
+<a name='L310'></a><a href='#L310'>310</a>
+<a name='L311'></a><a href='#L311'>311</a>
+<a name='L312'></a><a href='#L312'>312</a>
+<a name='L313'></a><a href='#L313'>313</a>
+<a name='L314'></a><a href='#L314'>314</a>
+<a name='L315'></a><a href='#L315'>315</a>
+<a name='L316'></a><a href='#L316'>316</a>
+<a name='L317'></a><a href='#L317'>317</a>
+<a name='L318'></a><a href='#L318'>318</a>
+<a name='L319'></a><a href='#L319'>319</a>
+<a name='L320'></a><a href='#L320'>320</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -395,6 +408,11 @@
 <span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -444,6 +462,9 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -500,6 +521,9 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -540,6 +564,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -687,9 +713,9 @@ import { getCache, setCache } from "../services/cache.service";
  */
 export const getStockData = (req: Request&lt;{ symbol: string }&gt;, res: Response): void =&gt; {
   const { symbol } = req.params;
-  const cacheKey = `stock_data_${symbol.toLowerCase()}`;
+  const cacheKey: string = `stock_data_${symbol.toLowerCase()}`;
 &nbsp;
-  const cached = getCache(cacheKey);
+  const cached: unknown = getCache(cacheKey);
   <span class="missing-if-branch" title="if path not taken" >I</span>if (cached) {
 <span class="cstat-no" title="statement not covered" >    res.status(200).json({</span>
       ...cached,
@@ -701,7 +727,12 @@ export const getStockData = (req: Request&lt;{ symbol: string }&gt;, res: Respon
   try {
     const mockPrice: number = +(100 + Math.random() * 100).toFixed(2);
 &nbsp;
-    const response = {
+    const response: {
+      symbol: string;
+      price: number;
+      currency: string;
+      timestamp: string;
+    } = {
       symbol: symbol.toUpperCase(),
       price: mockPrice,
       currency: "USD",
@@ -728,9 +759,9 @@ export const getStockData = (req: Request&lt;{ symbol: string }&gt;, res: Respon
  */
 export const getStockHistory = (req: Request&lt;{ symbol: string }&gt;, res: Response): void =&gt; {
   const { symbol } = req.params;
-  const cacheKey = `stock_history_${symbol.toLowerCase()}`;
+  const cacheKey: string = `stock_history_${symbol.toLowerCase()}`;
 &nbsp;
-  const cached = getCache(cacheKey);
+  const cached: unknown = getCache(cacheKey);
   if (cached) {
     res.status(200).json({
       ...cached,
@@ -750,7 +781,10 @@ export const getStockHistory = (req: Request&lt;{ symbol: string }&gt;, res: Res
       { date: "2025-04-03", price: 144.8 },
     ];
 &nbsp;
-    const response = {
+    const response: {
+      symbol: string;
+      history: { date: string; price: number }[];
+    } = {
       symbol: symbol.toUpperCase(),
       history: mockHistory,
     };
@@ -775,9 +809,9 @@ export const getStockHistory = (req: Request&lt;{ symbol: string }&gt;, res: Res
  */
 export const getStockNews = (req: Request&lt;{ symbol: string }&gt;, res: Response): void =&gt; {
   const { symbol } = req.params;
-  const cacheKey = `stock_news_${symbol.toLowerCase()}`;
+  const cacheKey: string = `stock_news_${symbol.toLowerCase()}`;
 &nbsp;
-  const cached = getCache(cacheKey);
+  const cached: unknown = getCache(cacheKey);
   if (cached) {
     res.status(200).json({
       ...cached,
@@ -806,7 +840,10 @@ export const getStockNews = (req: Request&lt;{ symbol: string }&gt;, res: Respon
       },
     ];
 &nbsp;
-    const response = {
+    const response: {
+      symbol: string;
+      news: { title: string; source: string; url: string; date: string }[];
+    } = {
       symbol: symbol.toUpperCase(),
       news: mockNews,
     };
@@ -827,9 +864,9 @@ export const getStockNews = (req: Request&lt;{ symbol: string }&gt;, res: Respon
  * @description Returns mock data for current stock market trends.
  */
 export const getMarketTrends = (_req: Request, res: Response): void =&gt; {
-  const cacheKey = "stock_market_trends";
+  const cacheKey: string = "stock_market_trends";
 &nbsp;
-  const cached = getCache(cacheKey);
+  const cached: unknown = getCache(cacheKey);
   if (cached) {
     res.status(200).json({
       ...cached,
@@ -845,7 +882,9 @@ export const getMarketTrends = (_req: Request, res: Response): void =&gt; {
       { sector: "Finance", trend: "Neutral", changePercent: "0.0%" },
     ];
 &nbsp;
-    const response = { trends: mockTrends };
+    const response: { trends: { sector: string; trend: string; changePercent: string }[] } = {
+      trends: mockTrends,
+    };
 &nbsp;
     setCache(cacheKey, response);
 &nbsp;
@@ -871,9 +910,9 @@ export const searchStocks = (
   res: Response
 ): void =&gt; {
   const query: string = typeof req.query.q === 'string' ? req.query.q.toLowerCase() : <span class="branch-1 cbranch-no" title="branch not covered" >'';</span>
-  const cacheKey = `stock_search_${query}`;
+  const cacheKey: string = `stock_search_${query}`;
 &nbsp;
-  const cached = getCache(cacheKey);
+  const cached: unknown = getCache(cacheKey);
   <span class="missing-if-branch" title="if path not taken" >I</span>if (cached) {
 <span class="cstat-no" title="statement not covered" >    res.status(200).json({</span>
       ...cached,
@@ -896,7 +935,7 @@ export const searchStocks = (
         stock.name.toLowerCase().includes(query)
     );
 &nbsp;
-    const response = { results };
+    const response: { results: { symbol: string; name: string }[] } = { results };
 &nbsp;
     setCache(cacheKey, response);
 &nbsp;
@@ -915,9 +954,9 @@ export const searchStocks = (
  */
 export const getStockSentiment = (req: Request&lt;{ symbol: string }&gt;, res: Response): void =&gt; {
   const { symbol } = req.params;
-  const cacheKey = `stock_sentiment_${symbol.toLowerCase()}`;
+  const cacheKey: string = `stock_sentiment_${symbol.toLowerCase()}`;
 &nbsp;
-  const cached = getCache(cacheKey);
+  const cached: unknown = getCache(cacheKey);
   <span class="missing-if-branch" title="if path not taken" >I</span>if (cached) {
 <span class="cstat-no" title="statement not covered" >    res.status(200).json({</span>
       ...cached,
@@ -988,7 +1027,7 @@ export const setStockAlert = (
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-04-20T00:39:35.053Z
+                at 2025-04-20T00:45:56.255Z
             </div>
         <script src="../../../../prettify.js"></script>
         <script>
