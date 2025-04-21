@@ -176,20 +176,63 @@ describe("removeStockFromPortfolio", () => {
   });
 });
 
+  it("should successfully remove the stock from the portfolio", async () => {
+    const mockDocRef = { ref: "mockRef" }; // fake doc ref
+    const mockGet = jest.fn().mockResolvedValue({
+      empty: false,
+      forEach: (cb: any) => cb(mockDocRef),
+    });
+
+    const mockBatch = {
+      delete: jest.fn(),
+      commit: jest.fn().mockResolvedValue({}),
+    };
+
+    const mockWhere = jest.fn(() => ({ get: mockGet }));
+    const mockCollection = jest.fn(() => ({ where: mockWhere }));
+    const mockFirestore = {
+      collection: mockCollection,
+      batch: () => mockBatch,
+    };
+
+    jest.spyOn(admin, "firestore").mockReturnValue(mockFirestore as any);
+
+    const req = { params: { symbol: "AAPL" } } as unknown as Request;
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    } as unknown as Response;
+
+    await removeStockFromPortfolio(req, res);
+
+    expect(mockCollection).toHaveBeenCalledWith("portfolios");
+    expect(mockWhere).toHaveBeenCalledWith("symbol", "==", "AAPL");
+    expect(mockBatch.delete).toHaveBeenCalled();
+    expect(mockBatch.commit).toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({ message: "Stock removed from portfolio" });
+  });
+
+
 describe("getPortfolioPerformance", () => {
   it("should return portfolio performance", async () => {
     const mockDocs = [
       { data: () => ({ quantity: 10, averageBuyPrice: 100 }) },
       { data: () => ({ quantity: 5, averageBuyPrice: 200 }) },
     ];
-    const mockGet = admin.firestore().collection("portfolios").get as jest.Mock;
-    mockGet.mockResolvedValue({ forEach: (cb: any) => mockDocs.forEach(cb) });
-
+  
+    const mockGet = jest.fn().mockResolvedValue({
+      forEach: (cb: any) => mockDocs.forEach(cb),
+    });
+  
+    const mockCollection = jest.fn(() => ({ get: mockGet }));
+    jest.spyOn(admin, "firestore").mockReturnValue({ collection: mockCollection } as any);
+  
     const req = {} as Request;
     const res = { status: jest.fn().mockReturnThis(), json: jest.fn() } as unknown as Response;
-
+  
     await getPortfolioPerformance(req, res);
-
+  
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({
       performance: {
@@ -197,14 +240,17 @@ describe("getPortfolioPerformance", () => {
         totalValue: 2200,
         returnPercentage: 10,
       },
+      });
+      });
     });
-  });
-});
+  
 
 describe("setPriceAlert", () => {
   it("should set a price alert successfully", async () => {
-    const mockAdd = admin.firestore().collection("alerts").add as jest.Mock;
-    mockAdd.mockResolvedValue({});
+    const mockAdd = jest.fn().mockResolvedValue({});
+  
+    const mockCollection = jest.fn(() => ({ add: mockAdd }));
+    jest.spyOn(admin, "firestore").mockReturnValue({ collection: mockCollection } as any);
   
     const req = { body: { symbol: "AAPL", targetPrice: 300 } } as Request;
     const res = {
@@ -217,19 +263,25 @@ describe("setPriceAlert", () => {
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith({ message: "Price alert set" });
   });
-  
-  it("should handle error during price alert creation", async () => {
-    const mockAdd = admin.firestore().collection("alerts").add as jest.Mock;
-    mockAdd.mockRejectedValue(new Error("Alert error"));
-
-    const req = { body: { symbol: "ERR", targetPrice: 300 } } as Request;
-    const res = { status: jest.fn().mockReturnThis(), json: jest.fn() } as unknown as Response;
-
-    await setPriceAlert(req, res);
-
-    expect(res.status).toHaveBeenCalledWith(500);
   });
-});
+
+  it("should handle error during price alert creation", async () => {
+    const mockAdd = jest.fn().mockRejectedValue(new Error("Alert error"));
+  
+    const mockCollection = jest.fn(() => ({ add: mockAdd }));
+    jest.spyOn(admin, "firestore").mockReturnValue({ collection: mockCollection } as any);
+  
+    const req = { body: { symbol: "ERR", targetPrice: 300 } } as Request;
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    } as unknown as Response;
+  
+    await setPriceAlert(req, res);
+  
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({ error: "Failed to set alert" });
+  });  
 
 describe("deletePriceAlert", () => {
   it("should handle error when deleting a price alert", async () => {
@@ -356,4 +408,3 @@ describe("Portfolio Routes (Integration Tests)", () => {
 
     expect([200, 401, 403, 500]).toContain(res.status);
   });
-
