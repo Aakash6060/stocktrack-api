@@ -9,7 +9,8 @@ import request from "supertest";
 import admin from "../src/config/firebase";
 import { Request, Response } from "express";
 import { clearCache } from "../src/api/v1/services/cache.service";
-  
+import * as cacheService from "../src/api/v1/services/cache.service";
+
 let mockUserRole: string = "Admin";
 
 // --- Firebase Mock Setup ---
@@ -106,6 +107,8 @@ jest.mock("../src/config/firebase", () => {
       });
   
       it("should return 404 if sector not found", async () => {
+        jest.spyOn(cacheService, "getCache").mockReturnValue(undefined);
+
         const mockGet = admin.firestore().collection("sectors").doc("Unknown").get as jest.Mock;
         mockGet.mockResolvedValue({ exists: false });
   
