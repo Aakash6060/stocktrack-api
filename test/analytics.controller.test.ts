@@ -55,6 +55,10 @@ jest.mock("../src/config/firebase", () => {
   // --- Test Suites ---
   
   describe("Analytics Controller", () => {
+    beforeEach(() => {
+      jest.restoreAllMocks(); 
+    });
+    
     // getMarketPerformance
     describe("getMarketPerformance", () => {
       it("should return market performance data", async () => {
@@ -88,6 +92,43 @@ jest.mock("../src/config/firebase", () => {
         expect(res.json).toHaveBeenCalledWith({ error: "Failed to retrieve market performance" });
       });
     });
+    
+      it("should return cached data for getMarketPerformance", async () => {
+        jest.spyOn(cacheService, "getCache").mockReturnValue({ data: "cached market", source: "CACHE" });
+      
+        const req = {} as Request;
+        const res = { status: jest.fn().mockReturnThis(), json: jest.fn() } as unknown as Response;
+      
+        await getMarketPerformance(req, res);
+      
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.json).toHaveBeenCalledWith({ data: "cached market", source: "CACHE" });
+      });
+    
+      it("should return cached sector insights", async () => {
+        const cachedResponse = {
+          insights: { sector: "Tech", performance: 12 },
+        };
+      
+        jest
+          .spyOn(cacheService, "getCache")
+          .mockReturnValue(cachedResponse);
+      
+        const req = { params: { sector: "Tech" } } as unknown as Request;
+        const res = {
+          status: jest.fn().mockReturnThis(),
+          json: jest.fn(),
+        } as unknown as Response;
+      
+        await getSectorInsights(req, res);
+      
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.json).toHaveBeenCalledWith({
+          ...cachedResponse,
+          source: "CACHE",
+        });
+      });
+      
   
     // getSectorInsights
     describe("getSectorInsights", () => {
@@ -158,7 +199,51 @@ jest.mock("../src/config/firebase", () => {
         expect(res.json).toHaveBeenCalledWith({ error: "Failed to fetch top movers" });
       });
     });
-  
+
+      it("should handle error when fetching losers", async () => {
+        const docMock = jest.fn()
+          .mockImplementationOnce(() => ({ get: jest.fn().mockResolvedValue({ exists: true, data: () => ({}) }) }))
+          .mockImplementationOnce(() => ({ get: jest.fn().mockRejectedValue(new Error("losers error")) }));
+      
+        const collectionMock = jest.fn(() => ({ doc: docMock }));
+        jest.spyOn(admin, "firestore").mockReturnValue({ collection: collectionMock } as any);
+      
+        const req = {} as Request;
+        const res = { status: jest.fn().mockReturnThis(), json: jest.fn() } as unknown as Response;
+      
+        await getTopMovers(req, res);
+      
+        expect(res.status).toHaveBeenCalledWith(500);
+        expect(res.json).toHaveBeenCalledWith({ error: "Failed to fetch top movers" });
+      });
+
+      it("should return cached top movers data", async () => {
+        const cachedResponse = {
+          topGainers: { AAPL: 5 },
+          topLosers: { TSLA: -3 },
+        };
+      
+        jest
+          .spyOn(cacheService, "getCache")
+          .mockReturnValue(cachedResponse);
+      
+        const req = {} as Request;
+        const res = {
+          status: jest.fn().mockReturnThis(),
+          json: jest.fn(),
+        } as unknown as Response;
+      
+        await getTopMovers(req, res);
+      
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.json).toHaveBeenCalledWith({
+          ...cachedResponse,
+          source: "CACHE",
+        });
+      });
+      
+    
+
     // getUserTrends
     describe("getUserTrends", () => {
       it("should return user trend analytics", async () => {
@@ -204,6 +289,34 @@ jest.mock("../src/config/firebase", () => {
         expect(res.status).toHaveBeenCalledWith(500);
       });
     });
+
+    it("should return cached user trends", async () => {
+      const cachedResponse = {
+        trends: [
+          { trend: "buy", count: 8 },
+          { trend: "sell", count: 2 },
+        ],
+      };
+    
+      jest
+        .spyOn(cacheService, "getCache")
+        .mockReturnValue(cachedResponse); // mock cache hit
+    
+      const req = {} as Request;
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      } as unknown as Response;
+    
+      await getUserTrends(req, res);
+    
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({
+        ...cachedResponse,
+        source: "CACHE",
+      });
+    });
+    
   
     // deleteNotification
     describe("deleteNotification", () => {
@@ -251,6 +364,24 @@ jest.mock("../src/config/firebase", () => {
       });
     });
   
+      it("should handle error if doc() fails", async () => {
+        const collectionMock = jest.fn(() => ({
+          doc: jest.fn(() => { throw new Error("doc access error") }),
+        }));
+      
+        jest.spyOn(admin, "firestore").mockReturnValue({
+          collection: collectionMock,
+        } as any);
+      
+        const req = { params: { id: "fail-id" } } as unknown as Request;
+        const res = { status: jest.fn().mockReturnThis(), json: jest.fn() } as unknown as Response;
+      
+        await deleteNotification(req, res);
+      
+        expect(res.status).toHaveBeenCalledWith(500);
+        expect(res.json).toHaveBeenCalledWith({ error: "Failed to delete notification" });
+      });
+    
     // setNotification
     describe("setNotification", () => {
       it("should set notification successfully", async () => {
@@ -321,6 +452,31 @@ jest.mock("../src/config/firebase", () => {
       });
     });
   });
+
+      it("should handle error if serverTimestamp fails", async () => {
+        const mockAdd = jest.fn();
+        const collectionMock = jest.fn(() => ({ add: mockAdd }));
+        const serverTimestamp = jest.fn(() => { throw new Error("timestamp error") });
+      
+        (admin.firestore as any) = jest.fn(() => ({ collection: collectionMock }));
+        (admin.firestore.FieldValue as any) = { serverTimestamp };
+      
+        const req = {
+          body: {
+            userId: "user1",
+            message: "Msg",
+            trigger: "Trigger"
+          }
+        } as Request;
+      
+        const res = { status: jest.fn().mockReturnThis(), json: jest.fn() } as unknown as Response;
+      
+        await setNotification(req, res);
+      
+        expect(res.status).toHaveBeenCalledWith(500);
+        expect(res.json).toHaveBeenCalledWith({ error: "Failed to set notification" });
+      });
+  
       
   
       describe("GET /api/v1/analytics/market", () => {
