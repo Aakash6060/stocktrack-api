@@ -3,12 +3,23 @@ import admin from "../../../config/firebase";
 import axios from "axios";
 
 /**
- * Registers a new user using Firebase Authentication.
- *
  * @route POST /auth/register
- * @param req - Express request object containing `email` and `password` in the body
- * @param res - Express response object
- * @returns 201 with user UID and email on success, 500 on failure
+ * @group Authentication - Firebase Auth management
+ * @description Registers a new user using Firebase Authentication.
+ * 
+ * @param {Request} req - Express request object with `email` and `password`
+ * @param {object} req.body
+ * @param {string} req.body.email - User's email address
+ * @param {string} req.body.password - User's password
+ * @example request - Registration payload
+ * {
+ *   "email": "user@example.com",
+ *   "password": "StrongPassword123"
+ * }
+ * 
+ * @param {Response} res - Express response object
+ * 
+ * @returns {Promise<void>} 201 Created with { uid, email } on success; 500 on failure
  */
 interface AuthRequestBody {
   email: string;
@@ -47,12 +58,23 @@ interface FirebaseLoginResponse {
 }
 
 /**
- * Logs in a user via Firebase Identity Toolkit.
- *
  * @route POST /auth/login
- * @param req - Express request object containing `email` and `password` in the body
- * @param res - Express response object
- * @returns Firebase ID token and user info on success, 401 on invalid credentials
+ * @group Authentication - Firebase Auth management
+ * @description Logs in a user via Firebase Identity Toolkit and returns an ID token.
+ * 
+ * @param {Request} req - Express request object with `email` and `password`
+ * @param {object} req.body
+ * @param {string} req.body.email - User's email address
+ * @param {string} req.body.password - User's password
+ * @example request - Login payload
+ * {
+ *   "email": "user@example.com",
+ *   "password": "StrongPassword123"
+ * }
+ * 
+ * @param {Response} res - Express response object
+ * 
+ * @returns {Promise<void>} 200 OK with ID token and user info on success; 401 on invalid credentials
  */
 export const loginUser = async (
   req: Request<object, object, AuthRequestBody>,
@@ -81,11 +103,23 @@ interface SetUserRoleBody {
 }
 
 /**
- * Sets a custom role for a user using Firebase Admin SDK.
- *
  * @route POST /auth/set-role
- * @param req - Express request object containing `uid` and `role`
- * @param res - Express response object
+ * @group Authentication - Firebase Auth management
+ * @description Sets a custom role for a Firebase-authenticated user.
+ * 
+ * @param {Request} req - Express request with `uid` and `role` in the body
+ * @param {object} req.body
+ * @param {string} req.body.uid - Firebase user ID
+ * @param {string} req.body.role - Custom role (e.g., admin, analyst, investor)
+ * @example request - Set role payload
+ * {
+ *   "uid": "abc123",
+ *   "role": "admin"
+ * }
+ * 
+ * @param {Response} res - Express response object
+ * 
+ * @returns {Promise<void>} 200 OK on success; 500 on failure
  */
 export const setUserRole = async (
   req: Request<object, object, SetUserRoleBody>,
@@ -105,11 +139,14 @@ export const setUserRole = async (
 };
 
 /**
- * Retrieves a list of all users. Can be filtered by role if needed.
- *
  * @route GET /users
- * @param req - Express request object
- * @param res - Express response object
+ * @group Users - Admin & user lookup operations
+ * @description Retrieves a list of all users with basic metadata and roles.
+ * 
+ * @param {Request} req - Express request object
+ * @param {Response} res - Express response object
+ * 
+ * @returns {Promise<void>} 200 OK with user list; 500 on error
  */
 export const listUsers = async (
   req: Request,
@@ -139,11 +176,15 @@ export const listUsers = async (
 };
 
 /**
- * Retrieves a user by ID (Admin or owner only).
- *
  * @route GET /users/:id
- * @param req - Express request object containing user ID
- * @param res - Express response object
+ * @group Users - Admin & user lookup operations
+ * @description Retrieves a user by their Firebase UID (Admin or Owner access only).
+ * 
+ * @param {Request} req - Express request object with `id` param
+ * @param {string} req.params.id - Firebase UID of the user
+ * @param {Response} res - Express response object
+ * 
+ * @returns {Promise<void>} 200 OK with user data; 404 if not found
  */
 export const getUserById = async (
   req: Request,

@@ -1,9 +1,7 @@
-jest.mock("../src/config/firebase", () => ({
-  __esModule: true,
-  default: {
-    firestore: jest.fn(), // Will override per test
-  },
-}));
+/**
+ * Mocks Firestore behavior for fetching stock history data.
+ * Returns a successful response with stock price history.
+ */
 const mockFirestoreHistorySuccess = () => {
   const firebase = require("../src/config/firebase").default;
 
@@ -27,6 +25,10 @@ const mockFirestoreHistorySuccess = () => {
   });
 };
 
+/**
+ * Mocks Firestore behavior for simulating a failure when fetching stock history.
+ * Throws an error to simulate Firestore failure.
+ */
 const mockFirestoreHistoryFailure = () => {
   const firebase = require("../src/config/firebase").default;
 
@@ -47,6 +49,10 @@ const mockFirestoreHistoryFailure = () => {
   });
 };
 
+/**
+ * Mocks Firestore behavior for fetching stock news data.
+ * Returns a successful response with stock news articles.
+ */
 const mockFirestoreNewsSuccess = () => {
   const firebase = require("../src/config/firebase").default;
 
@@ -89,6 +95,10 @@ const mockFirestoreNewsSuccess = () => {
   });
 };
 
+/**
+ * Mocks Firestore behavior for simulating a failure when fetching stock news.
+ * Throws an error to simulate Firestore failure.
+ */
 const mockFirestoreNewsFailure = () => {
   const firebase = require("../src/config/firebase").default;
 
@@ -109,6 +119,10 @@ const mockFirestoreNewsFailure = () => {
   });
 };
 
+/**
+ * Mocks Firestore behavior for fetching sector data.
+ * Returns a successful response with sector information.
+ */
 const mockFirestoreTrendsSuccess = () => {
   const firebase = require("../src/config/firebase").default;
 
@@ -135,6 +149,10 @@ const mockFirestoreTrendsSuccess = () => {
   });
 };
 
+/**
+ * Mocks Firestore behavior for searching stocks.
+ * Returns a successful response with stock data.
+ */
 const mockFirestoreSearchSuccess = () => {
   const firebase = require("../src/config/firebase").default;
 
@@ -159,6 +177,10 @@ const mockFirestoreSearchSuccess = () => {
   });
 };
 
+/**
+ * Mocks Firestore behavior for fetching stock sentiment data.
+ * Returns a successful response with sentiment analysis for a stock.
+ */
 const mockFirestoreSentimentSuccess = () => {
   const firebase = require("../src/config/firebase").default;
 
@@ -183,6 +205,10 @@ const mockFirestoreSentimentSuccess = () => {
   });
 };
 
+/**
+ * Mocks Firestore behavior for fetching stock data.
+ * Returns a successful response with stock price and update timestamp.
+ */
 const mockFirestoreStockDataSuccess = () => {
   const firebase = require("../src/config/firebase").default;
 
@@ -244,15 +270,20 @@ describe("Stock Controller", () => {
     jest.spyOn(cacheService, "getCache").mockReturnValue(undefined); // default: no cache
   });
 
-
   // --- getStockData Tests ---
   describe("getStockData", () => {
     /**
      * Test case: Should return stock data for a valid symbol.
+     * This test checks if the stock data for symbol "AAPL" is correctly fetched from Firestore or cache 
+     * and returns a successful response with status code 200.
      */
     it("should return stock data", async () => {
       clearCache("stock_data_aapl");
       const req = createRequest({ symbol: "AAPL" });
+
+      jest.spyOn(admin.firestore(), "collection").mockImplementationOnce(() => {
+        throw new Error("Simulated error");
+      });
 
       const res = {
         status: jest.fn().mockReturnThis(),
@@ -267,9 +298,15 @@ describe("Stock Controller", () => {
 
     /**
      * Test case: Should handle error when stock data retrieval fails.
+     * This test simulates a failure in fetching stock data and checks if the error response is returned with status code 500.
      */
     it("should handle error when fetching stock data fails", async () => {
       clearCache("stock_data_aapl");
+
+      jest.spyOn(admin.firestore(), "collection").mockImplementationOnce(() => {
+        throw new Error("Simulated error");
+      });
+      
       const req = createRequest({ symbol: "AAPL" });
 
       const res = {
@@ -284,6 +321,10 @@ describe("Stock Controller", () => {
     });
   });
 
+    /**
+     * Test case: Should return cached stock data if available.
+     * This test checks if cached stock data is used when it is available, returning it with a "CACHE" source.
+     */
     it("should return cached stock data", async () => {
       const cachedData = {
         symbol: "AAPL",
@@ -309,6 +350,10 @@ describe("Stock Controller", () => {
       });
     });
 
+    /**
+     * Test case: Should return 404 if stock data is not found in Firestore.
+     * This test simulates the case where no stock data is found in Firestore and checks if a 404 error is returned.
+     */
     it("should return 404 if stock data is not found in Firestore", async () => {
       clearCache("stock_data_aapl");
     
@@ -332,11 +377,14 @@ describe("Stock Controller", () => {
       expect(res.status).toHaveBeenCalledWith(404);
       expect(res.json).toHaveBeenCalledWith({ error: "Stock not found" });
     });
+  });
 
   // --- getStockHistory Tests ---
   describe("getStockHistory", () => {
     /**
      * Test case: Should return stock history for a valid symbol.
+     * This test checks that the stock history data for the given symbol "AAPL" is fetched correctly 
+     * from Firestore (or cache) and returned as a JSON response with status 200.
      */
     it("should return stock history", async () => {
       mockFirestoreHistorySuccess();
@@ -359,6 +407,8 @@ describe("Stock Controller", () => {
 
     /**
      * Test case: Should handle error when stock history retrieval fails.
+     * This test checks the error handling when Firestore or cache fails to retrieve stock history.
+     * It ensures that a 500 error response is returned with an appropriate error message.
      */
     it("should handle error when fetching stock history fails", async () => {
       mockFirestoreHistoryFailure(); 
@@ -380,6 +430,8 @@ describe("Stock Controller", () => {
   describe("getStockNews", () => {
     /**
      * Test case: Should return stock news for a valid symbol.
+     * This test checks that the stock news data for the given symbol "AAPL" is fetched correctly 
+     * from Firestore (or cache) and returned as a JSON response with status 200.
      */
     it("should return stock news", async () => {
       mockFirestoreNewsSuccess(); 
@@ -402,6 +454,8 @@ describe("Stock Controller", () => {
 
     /**
      * Test case: Should handle error when stock news retrieval fails.
+     * This test checks the error handling when Firestore or cache fails to retrieve stock news.
+     * It ensures that a 500 error response is returned with an appropriate error message.
      */
     it("should handle error when fetching stock news fails", async () => {
       mockFirestoreNewsFailure();
@@ -418,11 +472,12 @@ describe("Stock Controller", () => {
       expect(res.json).toHaveBeenCalledWith({ error: "Failed to fetch stock news" });
     });
   });
-});
 
 describe("getMarketTrends", () => {
   /**
    * Test case: Should return mock market trends.
+   * This test checks that market trends are returned correctly, either from cache or Firestore,
+   * as part of the response with status 200.
    */
   it("should return market trends", async () => {
     mockFirestoreTrendsSuccess();
@@ -443,6 +498,8 @@ describe("getMarketTrends", () => {
 
   /**
    * Test case: Should handle error when fetching trends fails.
+   * This test checks the error handling when fetching market trends fails, ensuring that a 500 error
+   * response is returned with an appropriate error message.
    */
   it("should handle error when fetching trends fails", async () => {
     const req = {} as Request;
@@ -468,6 +525,10 @@ describe("getMarketTrends", () => {
   });
 });
 
+  /**
+   * Test case: Should return cached search results.
+   * This test checks that cached search results are returned for a stock search query when available.
+   */
   it("should return cached search results", async () => {
     const cachedData = {
       results: [
@@ -493,6 +554,10 @@ describe("getMarketTrends", () => {
     });
   });
 
+  /**
+   * Test case: Should return cached market trends.
+   * This test checks that cached market trends are returned when available in the cache.
+   */
   it("should return cached market trends", async () => {
     const cachedResponse = {
       trends: [
@@ -500,17 +565,17 @@ describe("getMarketTrends", () => {
         { sector: "Energy", trend: "-1.2%" },
       ],
     };
-  
+
     jest.spyOn(cacheService, "getCache").mockReturnValue(cachedResponse);
-  
+
     const req = {} as Request;
     const res = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
     } as unknown as Response;
-  
+
     await getMarketTrends(req, res);
-  
+
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({
       ...cachedResponse,
@@ -518,36 +583,41 @@ describe("getMarketTrends", () => {
     });
   });
 
+  /**
+   * Test case: Should handle error when fetching trends fails.
+   * This test checks how the system handles errors when fetching market trends from Firestore or cache fails.
+   */
   it("should handle error when fetching trends fails", async () => {
     jest.spyOn(cacheService, "getCache").mockReturnValue(undefined);
-  
+
     const mockGet = jest.fn().mockRejectedValue(new Error("Simulated Firestore error"));
-  
+
     const mockCollection = jest.fn().mockReturnValue({
       get: mockGet,
     });
-  
+
     jest.spyOn(admin, "firestore").mockReturnValue({
       collection: mockCollection,
     } as unknown as FirebaseFirestore.Firestore);
-  
+
     const req = {} as Request;
     const res = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
     } as unknown as Response;
-  
+
     await getMarketTrends(req, res);
-  
+
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({ error: "Failed to fetch market trends" });
   });
-  
-  
+
 // --- searchStocks Tests ---
 describe("searchStocks", () => {
   /**
    * Test case: Should return search results for a query match.
+   * Verifies that when a query is provided, the system searches stocks 
+   * and returns filtered results.
    */
   it("should return filtered stock results", async () => {
     jest.spyOn(cacheService, "getCache").mockReturnValue(undefined);
@@ -572,6 +642,8 @@ describe("searchStocks", () => {
 
   /**
    * Test case: Should handle error when searching fails.
+   * Simulates an error during the filtering of stock results and checks 
+   * for proper error handling and response.
    */
   it("should handle error during stock search", async () => {
     // Force cache to be skipped
@@ -598,6 +670,11 @@ describe("searchStocks", () => {
 });
 });
 
+  /**
+   * Test case: Should return cached search results.
+   * Verifies that cached data is used if available, reducing the need 
+   * for repeated database queries.
+   */
   it("should return cached search results", async () => {
     const cachedData = {
       results: [{ symbol: "AAPL", name: "Apple Inc." }],
@@ -623,6 +700,11 @@ describe("searchStocks", () => {
     });
   });
 
+  /**
+   * Test case: Should handle non-string query by defaulting to empty string.
+   * Ensures that if a non-string value is provided for the search query, 
+   * it defaults to an empty string to prevent errors.
+   */
   it("should handle non-string query by defaulting to empty string", async () => {
     jest.spyOn(cacheService, "getCache").mockReturnValue(undefined);
   
@@ -657,8 +739,6 @@ describe("searchStocks", () => {
     });
   });
   
-
-
 // --- getStockSentiment Tests ---
 describe("getStockSentiment", () => {
   afterEach(() => {
@@ -667,6 +747,7 @@ describe("getStockSentiment", () => {
 
   /**
    * Test case: Should return sentiment analysis.
+   * Verifies that sentiment data is returned from cache if available.
    */
   it("should return cached sentiment data", async () => {
     const cachedSentiment = {
@@ -697,6 +778,7 @@ describe("getStockSentiment", () => {
 
   /**
    * Test case: Should handle sentiment analysis error.
+   * Ensures proper error handling if there's an issue processing sentiment data.
    */
   it("should handle sentiment analysis error", async () => {
     clearCache("stock_sentiment_aapl");
@@ -718,6 +800,10 @@ describe("getStockSentiment", () => {
   });
 });
 
+  /**
+   * Test case: Should return 404 if sentiment not found.
+   * Handles the scenario where sentiment data is not available in Firestore.
+   */
   it("should return 404 if sentiment not found", async () => {
     clearCache("stock_sentiment_aapl");
 
@@ -760,6 +846,7 @@ describe("getStockSentiment", () => {
 describe("setStockAlert", () => {
   /**
    * Test case: Should create stock alert with valid targetPrice.
+   * Verifies that stock alerts are created with a valid target price.
    */
   it("should create stock alert with valid targetPrice", async () => {
     const req = {
@@ -783,6 +870,7 @@ describe("setStockAlert", () => {
 
   /**
    * Test case: Should return 400 if targetPrice is missing.
+   * Verifies that an error is returned if the target price is not provided.
    */
   it("should return 400 if targetPrice is missing", async () => {
     const req = {
@@ -803,6 +891,7 @@ describe("setStockAlert", () => {
 
   /**
    * Test case: Should handle internal server error when alert fails.
+   * Simulates an error during alert creation and checks for proper error handling.
    */
   it("should handle internal error when setting alert", async () => {
     const req = {
@@ -827,11 +916,20 @@ describe("setStockAlert", () => {
   });
 });
 
+// --- Stock Routes (Integration Tests) ---
 describe("Stock Routes (Integration Tests)", () => {
+  /**
+   * Clears all mocks before each test to ensure no state leakage between tests.
+   */
   beforeEach(() => {
     jest.clearAllMocks(); 
   });
-  
+
+  /**
+   * Test case: Should return stock data for a valid symbol.
+   * Verifies that the stock data for a valid symbol (e.g., AAPL) is returned correctly.
+   * Expects properties like symbol, price, currency, and timestamp in the response.
+   */
   it("should return stock data for a valid symbol", async () => {
     mockFirestoreStockDataSuccess();
     const res = await request(app).get("/api/v1/stocks/AAPL");
@@ -844,6 +942,11 @@ describe("Stock Routes (Integration Tests)", () => {
   });
   });
 
+  /**
+   * Test case: Should return stock history for a valid symbol.
+   * Verifies that the stock history for a valid symbol (e.g., AAPL) is returned correctly.
+   * Expects the response to contain a history array.
+   */
   it("should return stock history for a valid symbol", async () => {
     mockFirestoreStockDataSuccess();
     const res = await request(app).get("/api/v1/stocks/AAPL/history");
@@ -854,6 +957,11 @@ describe("Stock Routes (Integration Tests)", () => {
     expect(Array.isArray(res.body.history)).toBe(true);
   });
 
+  /**
+   * Test case: Should return stock news for a valid symbol.
+   * Verifies that the stock news for a valid symbol (e.g., AAPL) is returned correctly.
+   * Expects the response to contain an array of news articles.
+   */
   it("should return stock news for a valid symbol", async () => {
     const res = await request(app).get("/api/v1/stocks/AAPL/news");
 
@@ -863,6 +971,10 @@ describe("Stock Routes (Integration Tests)", () => {
     expect(Array.isArray(res.body.news)).toBe(true);
   });
 
+  /**
+   * Test case: Should handle error when fetching history for an invalid symbol.
+   * Simulates an error when attempting to fetch stock history for an invalid symbol and checks for the error response.
+   */
   it("should handle error when fetching history for invalid symbol", async () => {
     const res = await request(app).get("/api/v1/stocks/error/history");
 
@@ -870,6 +982,10 @@ describe("Stock Routes (Integration Tests)", () => {
     expect(res.body).toHaveProperty("error", "Failed to fetch stock history");
   });
 
+  /**
+   * Test case: Should handle error when fetching news for an invalid symbol.
+   * Simulates an error when attempting to fetch stock news for an invalid symbol and checks for the error response.
+   */
   it("should handle error when fetching news for invalid symbol", async () => {
     const res = await request(app).get("/api/v1/stocks/error/news");
 
@@ -877,39 +993,59 @@ describe("Stock Routes (Integration Tests)", () => {
     expect(res.body).toHaveProperty("error", "Failed to fetch stock news");
   });
 
-it("should return market trends", async () => {
-  const res = await request(app).get("/api/v1/stocks/market-trends");
+  /**
+   * Test case: Should return market trends.
+   * Verifies that the market trends data is returned correctly.
+   * Expects the response to contain a list of market trends.
+   */
+  it("should return market trends", async () => {
+    const res = await request(app).get("/api/v1/stocks/market-trends");
 
-  expect(res.status).toBe(200);
-  expect(res.body).toHaveProperty("trends");
-  expect(Array.isArray(res.body.trends)).toBe(true);
-});
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveProperty("trends");
+    expect(Array.isArray(res.body.trends)).toBe(true);
+  });
 
-it("should search stocks based on query", async () => {
-  mockFirestoreSearchSuccess();
-  const res = await request(app).get("/api/v1/stocks/search?q=apple");
+    /**
+     * Test case: Should search stocks based on query.
+     * Verifies that stock search returns results based on the query parameter.
+     * Expects a list of results for a valid search query (e.g., 'apple').
+     */
+  it("should search stocks based on query", async () => {
+    mockFirestoreSearchSuccess();
+    const res = await request(app).get("/api/v1/stocks/search?q=apple");
 
-  expect(res.status).toBe(200);
-  expect(res.body).toHaveProperty("results");
-  expect(Array.isArray(res.body.results)).toBe(true);
-});
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveProperty("results");
+    expect(Array.isArray(res.body.results)).toBe(true);
+  });
 
-it("should return sentiment analysis for a stock", async () => {
-  mockFirestoreSentimentSuccess();
-  const res = await request(app).get("/api/v1/stocks/AAPL/sentiment");
+    /**
+     * Test case: Should return sentiment analysis for a stock.
+     * Verifies that sentiment analysis data for a stock (e.g., AAPL) is returned correctly.
+     * Expects sentiment score, sentiment, and summary in the response.
+     */
+  it("should return sentiment analysis for a stock", async () => {
+    mockFirestoreSentimentSuccess();
+    const res = await request(app).get("/api/v1/stocks/AAPL/sentiment");
 
-  expect(res.status).toBe(200);
-  expect(res.body).toHaveProperty("sentiment");
-  expect(res.body).toHaveProperty("sentimentScore");
-  expect(res.body).toHaveProperty("summary");
-});
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveProperty("sentiment");
+    expect(res.body).toHaveProperty("sentimentScore");
+    expect(res.body).toHaveProperty("summary");
+  });
 
-// --- Stock Alert Protected Route Test ---
-it("should deny access to alerts endpoint without token", async () => {
-  const res = await request(app)
-    .post("/api/v1/stocks/AAPL/alerts")
-    .send({ targetPrice: 200 });
+    // --- Stock Alert Protected Route Test ---
+    /**
+     * Test case: Should deny access to alerts endpoint without token.
+     * Verifies that access to the stock alerts endpoint is denied when the token is missing.
+     * Expects a 401 status and an appropriate error message.
+     */
+  it("should deny access to alerts endpoint without token", async () => {
+    const res = await request(app)
+      .post("/api/v1/stocks/AAPL/alerts")
+      .send({ targetPrice: 200 });
 
-  expect(res.status).toBe(401);
-  expect(res.body).toHaveProperty("error", "Missing token");
-});
+    expect(res.status).toBe(401);
+    expect(res.body).toHaveProperty("error", "Missing token");
+  });

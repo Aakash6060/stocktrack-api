@@ -10,35 +10,34 @@ const router: Router = Router();
  *   post:
  *     tags:
  *       - Portfolio
- *     description: Add a stock to the user's portfolio
- *     parameters:
- *       - in: body
- *         name: stock
- *         description: The stock information to add to the portfolio
- *         required: true
- *         schema:
- *           type: object
- *           required:
- *             - symbol
- *             - quantity
- *             - averageBuyPrice
- *           properties:
- *             symbol:
- *               type: string
- *               description: The stock symbol (e.g., "AAPL", "TSLA")
- *               example: "AAPL"
- *             quantity:
- *               type: integer
- *               description: The number of shares being added to the portfolio
- *               example: 10
- *             averageBuyPrice:
- *               type: number
- *               format: float
- *               description: The average price at which the stock was bought
- *               example: 145.50
+ *     summary: Add stock to portfolio
+ *     description: Adds a stock with quantity and average buy price to the authenticated user's portfolio.
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - symbol
+ *               - quantity
+ *               - averageBuyPrice
+ *             properties:
+ *               symbol:
+ *                 type: string
+ *                 example: "AAPL"
+ *               quantity:
+ *                 type: integer
+ *                 example: 10
+ *               averageBuyPrice:
+ *                 type: number
+ *                 format: float
+ *                 example: 145.5
  *     responses:
  *       201:
- *         description: Stock successfully added to portfolio
+ *         description: Stock added successfully
  *         content:
  *           application/json:
  *             schema:
@@ -48,15 +47,7 @@ const router: Router = Router();
  *                   type: string
  *                   example: "Stock added to portfolio"
  *       500:
- *         description: Failed to add stock to portfolio due to server or database error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   example: "Failed to add stock to portfolio due to a database issue"
+ *         description: Failed to add stock
  */
 router.post("/add-stock", verifyRole(["Investor"]), addStockToPortfolio);
 
@@ -66,12 +57,31 @@ router.post("/add-stock", verifyRole(["Investor"]), addStockToPortfolio);
  *   get:
  *     tags:
  *       - Portfolio
+ *     summary: Get user portfolio
+ *     description: Retrieves all stocks in the authenticated user's portfolio.
  *     security:
  *       - bearerAuth: []
- *     description: Get all stocks in the user's portfolio
  *     responses:
  *       200:
  *         description: Portfolio retrieved
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 portfolio:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                       symbol:
+ *                         type: string
+ *                       quantity:
+ *                         type: integer
+ *                       averageBuyPrice:
+ *                         type: number
  *       500:
  *         description: Failed to fetch portfolio
  */
@@ -83,18 +93,28 @@ router.get("/", verifyRole(["Investor"]), getUserPortfolio);
  *   delete:
  *     tags:
  *       - Portfolio
+ *     summary: Remove stock by symbol
+ *     description: Deletes all portfolio entries for the given stock symbol.
  *     security:
  *       - bearerAuth: []
- *     description: Remove a stock from portfolio by its symbol
  *     parameters:
  *       - in: path
  *         name: symbol
  *         required: true
- *         type: string
- *         description: Ticker symbol (e.g., "TSLA")
+ *         schema:
+ *           type: string
+ *         description: Ticker symbol of the stock
  *     responses:
  *       200:
- *         description: Stock removed
+ *         description: Stock removed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Stock removed from portfolio"
  *       404:
  *         description: Stock not found
  *       500:
@@ -108,12 +128,30 @@ router.delete("/remove/:symbol", verifyRole(["Investor"]), removeStockFromPortfo
  *   get:
  *     tags:
  *       - Portfolio
+ *     summary: Analyze portfolio performance
+ *     description: Returns total investment, value, and return percentage.
  *     security:
  *       - bearerAuth: []
- *     description: Analyze the user's portfolio performance
  *     responses:
  *       200:
- *         description: Performance summary returned
+ *         description: Performance calculated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 performance:
+ *                   type: object
+ *                   properties:
+ *                     totalInvestment:
+ *                       type: number
+ *                       example: 5000
+ *                     totalValue:
+ *                       type: number
+ *                       example: 5500
+ *                     returnPercentage:
+ *                       type: number
+ *                       example: 10
  *       500:
  *         description: Failed to calculate performance
  */
@@ -124,29 +162,38 @@ router.get("/performance", verifyRole(["Investor"]), getPortfolioPerformance);
  * /portfolio/alerts:
  *   post:
  *     tags:
- *       - Portfolio
+ *       - Alerts
+ *     summary: Set a price alert
+ *     description: Sets a stock price alert for the authenticated user.
  *     security:
  *       - bearerAuth: []
- *     description: Set a price alert for a stock
- *     parameters:
- *       - in: body
- *         name: alert
- *         required: true
- *         schema:
- *           type: object
- *           required:
- *             - symbol
- *             - targetPrice
- *           properties:
- *             symbol:
- *               type: string
- *               example: "GOOG"
- *             targetPrice:
- *               type: number
- *               example: 2800.00
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - symbol
+ *               - targetPrice
+ *             properties:
+ *               symbol:
+ *                 type: string
+ *                 example: "GOOGL"
+ *               targetPrice:
+ *                 type: number
+ *                 example: 2800
  *     responses:
  *       201:
- *         description: Alert created
+ *         description: Alert set successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Price alert set"
  *       500:
  *         description: Failed to set alert
  */
@@ -157,19 +204,29 @@ router.post("/alerts", verifyRole(["Investor"]), setPriceAlert);
  * /portfolio/alerts/{id}:
  *   delete:
  *     tags:
- *       - Portfolio
+ *       - Alerts
+ *     summary: Delete a price alert
+ *     description: Deletes an existing price alert by its document ID.
  *     security:
  *       - bearerAuth: []
- *     description: Delete a price alert by its ID
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
- *         type: string
- *         description: Alert document ID
+ *         schema:
+ *           type: string
+ *         description: Alert document ID to delete
  *     responses:
  *       200:
  *         description: Alert deleted
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Price alert deleted"
  *       500:
  *         description: Failed to delete alert
  */

@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import admin from "../config/firebase";
 
-// Extend the Request interface to add the 'user' property
+// Extend Express Request to include Firebase-decoded user info
 declare module "express" {
   export interface Request {
     user?: admin.auth.DecodedIdToken;
@@ -9,7 +9,10 @@ declare module "express" {
 }
 
 /**
- * Helper to extract the role safely from custom claims
+ * Safely extract the custom user role from the decoded Firebase token.
+ *
+ * @param {admin.auth.DecodedIdToken} decoded - Firebase token
+ * @returns {string | undefined} The role string, if it exists
  */
 const getUserRole = (decoded: admin.auth.DecodedIdToken): string | undefined => {
   if ("role" in decoded && typeof decoded.role === "string") {
@@ -26,16 +29,16 @@ const getUserRole = (decoded: admin.auth.DecodedIdToken): string | undefined => 
 /**
  * Middleware to verify if the authenticated user has one of the allowed roles.
  *
- * @param {string[]} allowedRoles - An array of roles that are allowed to access the route.
- * @returns {Function} Express middleware function.
+ * @param {string[]} allowedRoles - List of roles allowed to access this route
+ * @returns {Function} Express middleware that enforces role-based access
  *
- * This middleware:
- * - Extracts the Bearer token from the Authorization header.
- * - Verifies the token using Firebase Admin SDK.
- * - Checks if the decoded token contains a role that is allowed.
- * - Attaches the decoded user info to `req.user` if authorized.
- * - Responds with 401 if the token is missing or invalid.
- * - Responds with 403 if the role is not permitted.
+ * Behavior:
+ * - Extracts the Bearer token from the `Authorization` header
+ * - Verifies the token using Firebase Admin SDK
+ * - Extracts custom claims to determine the user's role
+ * - Allows access if the user's role matches one in `allowedRoles`
+ * - Attaches the decoded token to `req.user`
+ * - Responds with 401 (unauthorized) or 403 (forbidden) if conditions aren't met
  */
 export const verifyRole = (allowedRoles: string[]) => async (
   req: Request,
@@ -43,6 +46,7 @@ export const verifyRole = (allowedRoles: string[]) => async (
   next: NextFunction
 ): Promise<void> => {
   const token: string | undefined = req.headers.authorization?.split("Bearer ")[1];
+
   if (!token) {
     res.status(401).json({ error: "Missing token" });
     return;
@@ -65,11 +69,16 @@ export const verifyRole = (allowedRoles: string[]) => async (
 };
 
 /**
- * Middleware to verify if the authenticated user is either:
- * - the same as the user in `req.params.id`, OR
- * - has an Admin role.
+ * Middleware to verify if the authenticated user:
+ * - matches the `:id` param in the request path, OR
+ * - has the "Admin" role
  *
- * This is useful for endpoints like /users/:id where both the user and Admin should have access.
+ * This is useful for routes like GET `/users/:id`, where users can view
+ * their own profile or Admins can view any profile.
+ *
+ * Responds with:
+ * - 401 if token is missing or invalid
+ * - 403 if the user is neither the resource owner nor an Admin
  */
 export const verifySelfOrAdmin = async (
   req: Request,
@@ -77,6 +86,7 @@ export const verifySelfOrAdmin = async (
   next: NextFunction
 ): Promise<void> => {
   const token: string | undefined = req.headers.authorization?.split("Bearer ")[1];
+
   if (!token) {
     res.status(401).json({ error: "Missing token" });
     return;

@@ -8,8 +8,10 @@ import swaggerUi from 'swagger-ui-express';
 
 /**
  * Swagger configuration options.
- * - `definition`: Defines the OpenAPI spec version and basic API metadata.
- * - `apis`: Specifies the path to the route files containing JSDoc comments used to generate the docs.
+ * 
+ * - `openapi`: Specifies the OpenAPI version (3.0.0).
+ * - `info`: Provides metadata such as title, version, and description of the API.
+ * - `apis`: An array of file patterns that Swagger JSDoc should scan for annotations.
  */
 const options: Options = {
   definition: {
@@ -20,11 +22,15 @@ const options: Options = {
       description: 'This is a back-end API for managing stocks, portfolios, and market insights.',
     },
   },
-  apis: ['./src/api/v1/routes/*.ts'],
+  apis: ['./src/api/v1/routes/*.ts'], // Path to route files with Swagger JSDoc comments
 };
 
-// Generate Swagger specifications from the provided options
+/**
+ * Generates the OpenAPI specification from JSDoc annotations using swagger-jsdoc.
+ */
 const specs: ReturnType<typeof swaggerJsdoc> = swaggerJsdoc(options);
 
-// Export the Swagger specs and UI middleware to be used in the main server file
+/**
+ * Exports the generated Swagger specs and the middleware to serve Swagger UI.
+ */
 export { specs, swaggerUi };

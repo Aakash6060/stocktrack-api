@@ -10,43 +10,31 @@ const router: Router = Router();
  *   get:
  *     tags:
  *       - Analytics
- *     description: View overall stock market performance
+ *     summary: View overall stock market performance
+ *     description: Retrieve index-level market performance data (e.g., growth, volume)
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Market performance data
+ *         description: Market performance data retrieved successfully
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 marketIndex:
- *                   type: number
- *                 changePercentage:
- *                   type: number
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                 source:
+ *                   type: string
+ *                   example: "CACHE"
  *       401:
- *         description: Unauthorized
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Unauthorized access"
+ *         description: Unauthorized access
  *       403:
- *         description: Forbidden
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Insufficient permissions"
+ *         description: Forbidden - insufficient permissions
  *       500:
- *         description: Internal server error
+ *         description: Server error while retrieving market data
  */
 router.get("/market", verifyRole(["Analyst"]), getMarketPerformance);
 
@@ -56,52 +44,37 @@ router.get("/market", verifyRole(["Analyst"]), getMarketPerformance);
  *   get:
  *     tags:
  *       - Analytics
- *     description: Get insights on a specific sector
+ *     summary: Get insights on a specific sector
+ *     description: Fetch data and performance metrics for a given sector like 'technology'
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: sector
  *         required: true
- *         description: Sector name
+ *         description: Sector name (e.g., technology, healthcare)
  *         schema:
  *           type: string
  *     responses:
  *       200:
- *         description: Sector insights data
+ *         description: Sector insights returned
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 sector:
+ *                 insights:
+ *                   type: object
+ *                 source:
  *                   type: string
- *                 performance:
- *                   type: number
- *       401:
- *         description: Unauthorized
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Unauthorized access"
- *       403:
- *         description: Forbidden
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Insufficient permissions"
  *       404:
  *         description: Sector not found
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
  *       500:
- *         description: Internal server error
+ *         description: Error retrieving sector data
  */
 router.get("/sector/:sector", verifyRole(["Analyst"]), getSectorInsights);
 
@@ -111,47 +84,31 @@ router.get("/sector/:sector", verifyRole(["Analyst"]), getSectorInsights);
  *   get:
  *     tags:
  *       - Analytics
- *     description: Retrieve top gaining and losing stocks
+ *     summary: Retrieve top gaining and losing stocks
+ *     description: Returns top-performing and worst-performing stocks of the day
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Top movers data
+ *         description: Top movers data retrieved
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 gainers:
- *                   type: array
- *                   items:
- *                     type: object
- *                 losers:
- *                   type: array
- *                   items:
- *                     type: object
+ *                 topGainers:
+ *                   type: object
+ *                 topLosers:
+ *                   type: object
+ *                 source:
+ *                   type: string
+ *                   example: "FIRESTORE"
  *       401:
  *         description: Unauthorized
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Unauthorized access"
  *       403:
  *         description: Forbidden
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Insufficient permissions"
  *       500:
- *         description: Internal server error
+ *         description: Server error while retrieving top movers
  */
 router.get("/top-movers", verifyRole(["Analyst"]), getTopMovers);
 
@@ -161,12 +118,13 @@ router.get("/top-movers", verifyRole(["Analyst"]), getTopMovers);
  *   get:
  *     tags:
  *       - Analytics
- *     description: Analyze user portfolio trends
+ *     summary: Analyze user portfolio trends
+ *     description: Returns user behavior insights and trend analytics
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: User trend analytics
+ *         description: User trends fetched successfully
  *         content:
  *           application/json:
  *             schema:
@@ -176,18 +134,15 @@ router.get("/top-movers", verifyRole(["Analyst"]), getTopMovers);
  *                   type: array
  *                   items:
  *                     type: object
+ *                 source:
+ *                   type: string
+ *                   example: "CACHE"
  *       401:
  *         description: Unauthorized
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Unauthorized access"
  *       403:
- *         description: Forbidden
+ *         description: Forbidden - admin access required
+ *       500:
+ *         description: Failed to retrieve user trend analytics
  */
 router.get("/user-trends", verifyRole(["Admin"]), getUserTrends);
 
@@ -197,35 +152,40 @@ router.get("/user-trends", verifyRole(["Admin"]), getUserTrends);
  *   post:
  *     tags:
  *       - Notifications
- *     description: Set user-specific notifications
+ *     summary: Set user-specific notification
+ *     description: Allows investors to set personalized stock alerts based on a trigger condition
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - in: body
- *         name: notification
- *         required: true
- *         schema:
- *           type: object
- *           required:
- *             - userId
- *             - message
- *             - trigger
- *           properties:
- *             userId:
- *               type: string
- *             message:
- *               type: string
- *             trigger:
- *               type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - userId
+ *               - message
+ *               - trigger
+ *             properties:
+ *               userId:
+ *                 type: string
+ *               message:
+ *                 type: string
+ *               trigger:
+ *                 type: string
+ *             example:
+ *               userId: "abc123"
+ *               message: "AAPL crossed $150"
+ *               trigger: "AAPL > 150"
  *     responses:
  *       201:
- *         description: Notification set successfully
+ *         description: Notification created
  *       401:
  *         description: Unauthorized
  *       403:
  *         description: Forbidden
  *       500:
- *         description: Internal server error
+ *         description: Internal error while creating notification
  */
 router.post("/notifications", verifyRole(["Investor"]), setNotification);
 
@@ -235,7 +195,8 @@ router.post("/notifications", verifyRole(["Investor"]), setNotification);
  *   delete:
  *     tags:
  *       - Notifications
- *     description: Remove a user-specific notification
+ *     summary: Delete a user notification
+ *     description: Removes a user-set notification by its document ID
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -244,6 +205,7 @@ router.post("/notifications", verifyRole(["Investor"]), setNotification);
  *         required: true
  *         schema:
  *           type: string
+ *         description: ID of the notification to delete
  *     responses:
  *       200:
  *         description: Notification deleted successfully
@@ -252,7 +214,7 @@ router.post("/notifications", verifyRole(["Investor"]), setNotification);
  *       403:
  *         description: Forbidden
  *       500:
- *         description: Internal server error
+ *         description: Failed to delete the notification
  */
 router.delete("/notifications/:id", verifyRole(["Investor"]), deleteNotification);
 

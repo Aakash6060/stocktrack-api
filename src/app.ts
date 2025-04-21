@@ -65,9 +65,12 @@ app.use("/api/v1/analytics", analyticsRoutes);
 
 /**
  * Root route to verify API is running.
+ *
+ * @route GET /
+ * @returns {string} Welcome message
  */
 app.get("/", (req: Request, res: Response) => {
-    res.send("Welcome to StockTrack API");
-  });
+  res.send("Welcome to StockTrack API");
+});
 
 export default app;

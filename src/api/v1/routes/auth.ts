@@ -10,24 +10,24 @@ const router: Router = Router();
  *   post:
  *     tags:
  *       - Auth
- *     description: Register a new user
- *     parameters:
- *       - in: body
- *         name: user
- *         description: The user information to register
- *         required: true
- *         schema:
- *           type: object
- *           required:
- *             - email
- *             - password
- *           properties:
- *             email:
- *               type: string
- *               example: "test@example.com"
- *             password:
- *               type: string
- *               example: "password123"
+ *     summary: Register a new user
+ *     description: Registers a new user using Firebase Authentication
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: "test@example.com"
+ *               password:
+ *                 type: string
+ *                 example: "password123"
  *     responses:
  *       201:
  *         description: User registered successfully
@@ -38,10 +38,8 @@ const router: Router = Router();
  *               properties:
  *                 uid:
  *                   type: string
- *                   description: Unique user ID
  *                 email:
  *                   type: string
- *                   description: User email address
  *       500:
  *         description: Registration failed
  *         content:
@@ -51,18 +49,9 @@ const router: Router = Router();
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "Registration failed"
  *                 error:
- *                   type: object
- *                   properties:
- *                     code:
- *                       type: string
- *                       example: "auth/email-already-exists"
- *                     message:
- *                       type: string
- *                       example: "The email address is already in use by another account."
+ *                   type: string
  */
-
 router.post("/register", registerUser);
 
 /**
@@ -71,27 +60,27 @@ router.post("/register", registerUser);
  *   post:
  *     tags:
  *       - Auth
- *     description: Login an existing user and return authentication tokens
- *     parameters:
- *       - in: body
- *         name: credentials
- *         description: The user's login credentials
- *         required: true
- *         schema:
- *           type: object
- *           required:
- *             - email
- *             - password
- *           properties:
- *             email:
- *               type: string
- *               example: "test@example.com"
- *             password:
- *               type: string
- *               example: "password123"
+ *     summary: Login an existing user
+ *     description: Logs in an existing Firebase user and returns an ID token
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: "test@example.com"
+ *               password:
+ *                 type: string
+ *                 example: "password123"
  *     responses:
  *       200:
- *         description: Successful login, returns the auth token and refresh token
+ *         description: Successful login
  *         content:
  *           application/json:
  *             schema:
@@ -99,12 +88,10 @@ router.post("/register", registerUser);
  *               properties:
  *                 idToken:
  *                   type: string
- *                   description: Firebase authentication token used for authorizing API requests
  *                 refreshToken:
  *                   type: string
- *                   description: Firebase refresh token used for obtaining new `idToken` when it expires
  *       401:
- *         description: Invalid credentials (e.g., incorrect email/password)
+ *         description: Invalid credentials
  *         content:
  *           application/json:
  *             schema:
@@ -122,26 +109,26 @@ router.post("/login", loginUser);
  *   post:
  *     tags:
  *       - Auth
- *     description: Assign a custom role to a user (Admin only)
+ *     summary: Assign a custom role to a user
+ *     description: Admins can set a Firebase custom role for any user
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - in: body
- *         name: data
- *         required: true
- *         description: User UID and role
- *         schema:
- *           type: object
- *           required:
- *             - uid
- *             - role
- *           properties:
- *             uid:
- *               type: string
- *               example: "uid_123"
- *             role:
- *               type: string
- *               example: "Investor"
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - uid
+ *               - role
+ *             properties:
+ *               uid:
+ *                 type: string
+ *                 example: "uid_123"
+ *               role:
+ *                 type: string
+ *                 example: "Investor"
  *     responses:
  *       200:
  *         description: Role set successfully
@@ -150,7 +137,7 @@ router.post("/login", loginUser);
  *       403:
  *         description: Forbidden
  *       500:
- *         description: Server error
+ *         description: Failed to set role
  */
 router.post("/set-role", verifyRole(["Admin"]), setUserRole);
 
@@ -160,18 +147,37 @@ router.post("/set-role", verifyRole(["Admin"]), setUserRole);
  *   get:
  *     tags:
  *       - Users
- *     description: List all users (Admin only)
+ *     summary: List all users
+ *     description: Retrieve all Firebase users and their custom claims (Admin only)
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Array of user profiles
+ *         description: Array of users
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 users:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       uid:
+ *                         type: string
+ *                       email:
+ *                         type: string
+ *                       displayName:
+ *                         type: string
+ *                       customClaims:
+ *                         type: object
  *       401:
  *         description: Unauthorized
  *       403:
  *         description: Forbidden
  *       500:
- *         description: Server error
+ *         description: Failed to list users
  */
 router.get("/users", verifyRole(["Admin"]), listUsers);
 
@@ -181,19 +187,33 @@ router.get("/users", verifyRole(["Admin"]), listUsers);
  *   get:
  *     tags:
  *       - Users
- *     description: Get user profile by ID (Admin or Owner only)
+ *     summary: Get user by ID
+ *     description: Admins or the user themselves can view user profile data
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
- *         description: User ID to fetch
  *         schema:
  *           type: string
+ *         description: Firebase UID of the user
  *     responses:
  *       200:
- *         description: User profile details
+ *         description: User data retrieved
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 uid:
+ *                   type: string
+ *                 email:
+ *                   type: string
+ *                 displayName:
+ *                   type: string
+ *                 customClaims:
+ *                   type: object
  *       401:
  *         description: Unauthorized
  *       403:
@@ -202,4 +222,5 @@ router.get("/users", verifyRole(["Admin"]), listUsers);
  *         description: User not found
  */
 router.get("/users/:id", verifySelfOrAdmin, getUserById);
+
 export default router;

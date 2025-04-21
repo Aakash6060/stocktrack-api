@@ -8,6 +8,9 @@ dotenv.config();
 import Sentiment from 'sentiment';
 const sentiment: Sentiment = new Sentiment();
 
+/**
+ * Represents a quote returned from Financial Modeling Prep API.
+ */
 interface FMPQuote {
   symbol: string;
   price: number;
@@ -15,14 +18,23 @@ interface FMPQuote {
   timestamp: number;
 }
 
+/**
+ * Maps stock symbols to their associated sectors.
+ */
 interface SectorMap {
   [symbol: string]: string;
 }
 
+/**
+ * Maps stock symbols to their company names.
+ */
 interface NameMap {
   [symbol: string]: string;
 }
 
+/**
+ * Represents a news article returned from Finnhub API.
+ */
 interface NewsArticle {
   datetime: number;
   headline: string;
@@ -30,27 +42,53 @@ interface NewsArticle {
   url: string;
 }
 
+/**
+ * Represents a stock document stored in the portfolio collection.
+ */
 interface PortfolioDoc {
   symbol: string;
   quantity: number;
 }
 
+/**
+ * Hardcoded mapping of stock symbols to sector categories.
+ */
 const SECTOR_MAP: SectorMap = {
   AAPL: 'technology',
   GOOGL: 'technology',
   MSFT: 'technology',
 };
 
+/**
+ * Hardcoded mapping of stock symbols to company names.
+ */
 const NAME_MAP: NameMap = {
   AAPL: 'Apple Inc.',
   GOOGL: 'Alphabet Inc.',
   MSFT: 'Microsoft Corporation',
 };
 
+/**
+ * Financial Modeling Prep API key loaded from environment variable.
+ */
 const FMP_API_KEY: string = process.env.FMP_API_KEY || '';
+
+/**
+ * Finnhub API key loaded from environment variable.
+ */
 const FINNHUB_API_KEY: string = process.env.FINNHUB_API_KEY || '';
+
+/**
+ * List of tracked stock symbols based on NAME_MAP keys.
+ */
 const STOCK_SYMBOLS: string[] = Object.keys(NAME_MAP);
 
+/**
+ * Schedules a cron job to fetch and store stock data, news, sentiment,
+ * sector insights, top movers, market performance, and user portfolio trends.
+ * 
+ * Runs every 15 seconds.
+ */
 export const scheduleStockDataFetch = (): void => {
   cron.schedule('15 * * * * *', () => {
     void (async (): Promise<void> => {

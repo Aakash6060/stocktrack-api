@@ -2,7 +2,8 @@
  * @fileoverview Initializes Firebase Admin SDK and exports Firestore database instance.
  * 
  * This module sets up Firebase Admin using service account credentials. It allows 
- * access to Firestore for server-side operations.
+ * access to Firestore for server-side operations and optionally exports the full 
+ * admin SDK for authentication and other services.
  */
 
 import * as dotenv from 'dotenv';
@@ -17,9 +18,9 @@ dotenv.config();
 /**
  * Load the Firebase service account credentials.
  * 
- * Credentials are either loaded from the environment variable 
- * `FIREBASE_SERVICE_ACCOUNT_KEY` or from a local file `serviceAccountKey.json`
- * as a fallback (useful during development).
+ * Credentials are loaded from either:
+ * - Environment variable `FIREBASE_SERVICE_ACCOUNT_KEY` (recommended in production)
+ * - Fallback local file `serviceAccountKey.json` (for development)
  */
 let serviceAccount: ServiceAccount;
 
@@ -37,6 +38,7 @@ if (process.env.FIREBASE_SERVICE_ACCOUNT_KEY) {
     throw new Error('Failed to parse FIREBASE_SERVICE_ACCOUNT_KEY: ' + message);
   }
 } else {
+  // Local fallback for development
   const path: string = require.resolve('../../serviceAccountKey.json');
   const rawKey: string = fs.readFileSync(path, 'utf-8');
   const parsedKey: unknown = JSON.parse(rawKey);
@@ -57,13 +59,17 @@ admin.initializeApp({
 
 /**
  * Firestore database instance.
- * 
- * Exported for use throughout the application.
+ *
+ * @type {Firestore}
+ * @example
+ * import { db } from './config/firebase';
+ * const snapshot = await db.collection('users').get();
  */
 export const db: Firestore = admin.firestore();
 
 /**
- * Export the initialized admin instance to allow access 
- * to other Firebase Admin features if needed.
+ * Export the initialized admin instance for use with Firebase Auth, Storage, etc.
+ *
+ * @type {admin.app.App}
  */
 export default admin;

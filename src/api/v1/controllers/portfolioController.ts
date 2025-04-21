@@ -13,17 +13,25 @@ interface SetAlertRequestBody {
 }
 /**
  * @route POST /portfolio/add
+ * @group Portfolio - Stock portfolio management
  * @description Adds a stock to the user's portfolio.
- * @access Authenticated users
+ * @access Investor
  * 
- * @param {Request} req - Express request object containing:
- *  - `symbol` (string): Ticker symbol of the stock.
- *  - `quantity` (number): Number of shares to add.
- *  - `averageBuyPrice` (number): Average price at which the stock was bought.
+ * @param {Request} req - Express request with stock info
+ * @param {object} req.body
+ * @param {string} req.body.symbol - Ticker symbol of the stock
+ * @param {number} req.body.quantity - Number of shares to add
+ * @param {number} req.body.averageBuyPrice - Average buy price per share
+ * @example request - Add stock
+ * {
+ *   "symbol": "AAPL",
+ *   "quantity": 10,
+ *   "averageBuyPrice": 145
+ * }
  * 
  * @param {Response} res - Express response object
  * 
- * @returns {Promise<void>} Responds with a success message or error.
+ * @returns {Promise<void>} 201 Created on success; 500 on failure
  */
 export const addStockToPortfolio = async (
   req: Request<unknown, unknown, AddStockRequestBody>,
@@ -48,13 +56,14 @@ export const addStockToPortfolio = async (
 
 /**
  * @route GET /portfolio
+ * @group Portfolio - Stock portfolio management
  * @description Retrieves the authenticated user's stock portfolio.
  * @access Investor
  * 
  * @param {Request} req - Express request object
  * @param {Response} res - Express response object
  * 
- * @returns {Promise<void>} List of portfolio stocks
+ * @returns {Promise<void>} 200 OK with portfolio list; 500 on error
  */
 export const getUserPortfolio = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -82,13 +91,15 @@ export const getUserPortfolio = async (req: Request, res: Response): Promise<voi
 
 /**
  * @route DELETE /portfolio/remove/:symbol
+ * @group Portfolio - Stock portfolio management
  * @description Removes a stock from the user's portfolio using the symbol.
  * @access Investor
  * 
- * @param {Request} req - Express request with symbol param
- * @param {Response} res - Express response
+ * @param {Request} req - Express request with `symbol` param
+ * @param {string} req.params.symbol - Ticker symbol to remove
+ * @param {Response} res - Express response object
  * 
- * @returns {Promise<void>} Deletion result
+ * @returns {Promise<void>} 200 OK on success; 404 if not found; 500 on error
  */
 export const removeStockFromPortfolio = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -115,10 +126,14 @@ export const removeStockFromPortfolio = async (req: Request, res: Response): Pro
 
 /**
  * @route GET /portfolio/performance
- * @description Analyzes user's portfolio performance.
+ * @group Portfolio - Stock portfolio management
+ * @description Analyzes the user's portfolio performance based on current holdings.
  * @access Investor
  * 
- * @returns {Promise<void>} Portfolio performance summary
+ * @param {Request} req - Express request object
+ * @param {Response} res - Express response object
+ * 
+ * @returns {Promise<void>} 200 OK with { totalInvestment, totalValue, returnPercentage }; 500 on error
  */
 export const getPortfolioPerformance = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -152,13 +167,23 @@ export const getPortfolioPerformance = async (req: Request, res: Response): Prom
 
 /**
  * @route POST /portfolio/alerts
- * @description Sets a price alert for a stock.
+ * @group Alerts - Stock price notifications
+ * @description Sets a price alert for a specific stock.
  * @access Investor
  * 
- * @param {Request} req - Express request with symbol and targetPrice
- * @param {Response} res - Express response
+ * @param {Request} req - Express request with alert data
+ * @param {object} req.body
+ * @param {string} req.body.symbol - Ticker symbol
+ * @param {number} req.body.targetPrice - Price at which to trigger the alert
+ * @example request - Set alert
+ * {
+ *   "symbol": "GOOGL",
+ *   "targetPrice": 2800
+ * }
  * 
- * @returns {Promise<void>} Success or failure message
+ * @param {Response} res - Express response object
+ * 
+ * @returns {Promise<void>} 201 Created with confirmation message; 500 on error
  */
 export const setPriceAlert = async (
   req: Request<unknown, unknown, SetAlertRequestBody>,
@@ -178,13 +203,15 @@ export const setPriceAlert = async (
 
 /**
  * @route DELETE /portfolio/alerts/:id
- * @description Deletes a price alert by ID.
+ * @group Alerts - Stock price notifications
+ * @description Deletes a price alert by its unique ID.
  * @access Investor
  * 
- * @param {Request} req - Express request with alert ID
- * @param {Response} res - Express response
+ * @param {Request} req - Express request with alert ID param
+ * @param {string} req.params.id - Alert document ID to delete
+ * @param {Response} res - Express response object
  * 
- * @returns {Promise<void>} Success or error message
+ * @returns {Promise<void>} 200 OK on success; 500 on failure
  */
 export const deletePriceAlert = async (req: Request, res: Response): Promise<void> => {
   try {

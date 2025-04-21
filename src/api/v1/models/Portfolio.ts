@@ -1,19 +1,28 @@
 /**
- * Represents a stock held within a user's portfolio.
+ * Represents a stock held within a user's investment portfolio.
+ *
+ * @interface PortfolioStock
  */
 export interface PortfolioStock {
   /**
-   * The stock ticker symbol (e.g., AAPL, GOOGL).
+   * The stock ticker symbol.
+   * For example: "AAPL", "GOOGL", "TSLA"
+   * 
+   * @example "AAPL"
    */ 
     symbol: string;
   
   /**
-   * The number of shares the user owns for this stock.
+   * The number of shares owned for this stock.
+   * 
+   * @example 10
    */
     quantity: number;
 
   /**
-   * The average price the user paid per share when buying this stock.
+   * The average price paid per share.
+   * 
+   * @example 145.75
    */
     averageBuyPrice: number;
   }

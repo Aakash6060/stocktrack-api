@@ -1,43 +1,42 @@
 /**
- * Extends the Express Request interface to include Firebase Auth decoded token.
+ * Extends the Express Request interface to include Firebase Auth decoded token
+ * and typed request bodies for authentication endpoints.
  * 
- * This allows access to `req.user` throughout the app after Firebase authentication middleware
- * has decoded the ID token. The `user` field will contain the decoded Firebase ID token payload.
- * 
- * Example usage in a route:
+ * This allows usage like:
  * ```ts
- * app.get('/profile', (req, res) => {
- *   const uid = req.user?.uid; // Access Firebase UID
- *   res.send(`User ID: ${uid}`);
- * });
+ * const uid = req.user?.uid;
+ * const { email, password } = req.body;
  * ```
  */
 
 import * as admin from "firebase-admin";
 
-// Extending Express's Request interface with AuthRequestBody
+/**
+ * Shape of request body used for authentication (login/register).
+ */
 export interface AuthRequestBody {
   email: string;
   password: string;
 }
 
+// Extend Express Request globally
 declare global {
   namespace Express {
     interface Request {
-      body: AuthRequestBody;
       /**
-       * The Firebase decoded ID token, added to the request after authentication.
-       * Optional because unauthenticated requests won't have this field.
+       * The Firebase decoded ID token.
+       * Available only after successful Firebase auth middleware.
        */
       user?: admin.auth.DecodedIdToken;
+
+      /**
+       * Strongly-typed request body for authentication routes.
+       * Automatically inferred in login/register routes.
+       */
+      body: AuthRequestBody;
     }
   }
 }
 
-export interface AuthRequestBody {
-  email: string;
-  password: string;
-}
-
-// Required to ensure this file is treated as a module
+// Mark this file as a module
 export {};
