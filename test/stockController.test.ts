@@ -219,6 +219,8 @@ import { Request, Response } from "express";
 import request from "supertest";
 import app from "../src/app";
 import { clearCache } from "../src/api/v1/services/cache.service";
+import * as cacheService from "../src/api/v1/services/cache.service";
+import admin from "../src/config/firebase";
 
 // --- Helper Function ---
 
@@ -237,8 +239,10 @@ const createRequest = (params: { symbol: string }): Request<{ symbol: string }> 
 // --- Test Suite ---
 
 describe("Stock Controller", () => {
-  // --- Global Mocks ---
-
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.spyOn(cacheService, "getCache").mockReturnValue(undefined); // default: no cache
+  });
 
 
   // --- getStockData Tests ---
@@ -279,6 +283,55 @@ describe("Stock Controller", () => {
       expect(res.json).toHaveBeenCalledWith({ error: "Failed to fetch stock data" });
     });
   });
+
+    it("should return cached stock data", async () => {
+      const cachedData = {
+        symbol: "AAPL",
+        price: 185.67,
+        change: 1.23,
+        volume: 5000000,
+      };
+    
+      jest.spyOn(cacheService, "getCache").mockReturnValue(cachedData);
+    
+      const req = createRequest({ symbol: "AAPL" });
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      } as unknown as Response;
+    
+      await getStockData(req, res);
+    
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({
+        ...cachedData,
+        source: "CACHE",
+      });
+    });
+
+    it("should return 404 if stock data is not found in Firestore", async () => {
+      clearCache("stock_data_aapl");
+    
+      // Simulate Firestore returning no matching document
+      jest.spyOn(admin, "firestore").mockReturnValue({
+        collection: jest.fn().mockReturnValue({
+          doc: jest.fn(() => ({
+            get: jest.fn().mockResolvedValue({ exists: false }),
+          })),
+        }),
+      } as any);
+    
+      const req = createRequest({ symbol: "AAPL" });
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      } as unknown as Response;
+    
+      await getStockData(req, res);
+    
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.json).toHaveBeenCalledWith({ error: "Stock not found" });
+    });
 
   // --- getStockHistory Tests ---
   describe("getStockHistory", () => {
@@ -415,12 +468,89 @@ describe("getMarketTrends", () => {
   });
 });
 
+  it("should return cached search results", async () => {
+    const cachedData = {
+      results: [
+        { symbol: "AAPL", name: "Apple Inc." },
+        { symbol: "MSFT", name: "Microsoft Corp." },
+      ],
+    };
+
+    jest.spyOn(cacheService, "getCache").mockReturnValue(cachedData);
+
+    const req = { query: { q: "apple" } } as unknown as Request;
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    } as unknown as Response;
+
+    await searchStocks(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
+      ...cachedData,
+      source: "CACHE",
+    });
+  });
+
+  it("should return cached market trends", async () => {
+    const cachedResponse = {
+      trends: [
+        { sector: "Tech", trend: "+3.5%" },
+        { sector: "Energy", trend: "-1.2%" },
+      ],
+    };
+  
+    jest.spyOn(cacheService, "getCache").mockReturnValue(cachedResponse);
+  
+    const req = {} as Request;
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    } as unknown as Response;
+  
+    await getMarketTrends(req, res);
+  
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
+      ...cachedResponse,
+      source: "CACHE",
+    });
+  });
+
+  it("should handle error when fetching trends fails", async () => {
+    jest.spyOn(cacheService, "getCache").mockReturnValue(undefined);
+  
+    const mockGet = jest.fn().mockRejectedValue(new Error("Simulated Firestore error"));
+  
+    const mockCollection = jest.fn().mockReturnValue({
+      get: mockGet,
+    });
+  
+    jest.spyOn(admin, "firestore").mockReturnValue({
+      collection: mockCollection,
+    } as unknown as FirebaseFirestore.Firestore);
+  
+    const req = {} as Request;
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    } as unknown as Response;
+  
+    await getMarketTrends(req, res);
+  
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({ error: "Failed to fetch market trends" });
+  });
+  
+  
 // --- searchStocks Tests ---
 describe("searchStocks", () => {
   /**
    * Test case: Should return search results for a query match.
    */
   it("should return filtered stock results", async () => {
+    jest.spyOn(cacheService, "getCache").mockReturnValue(undefined);
     mockFirestoreSearchSuccess();
     const req = {
       query: { q: "apple" },
@@ -444,7 +574,37 @@ describe("searchStocks", () => {
    * Test case: Should handle error when searching fails.
    */
   it("should handle error during stock search", async () => {
-    clearCache("stock_search_apple");
+    // Force cache to be skipped
+    jest.spyOn(cacheService, "getCache").mockReturnValue(undefined);
+  
+    const req = {
+      query: { q: "apple" },
+    } as unknown as Request;
+  
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    } as unknown as Response;
+  
+    // Simulate error in filter
+    jest.spyOn(Array.prototype, "filter").mockImplementationOnce(() => {
+      throw new Error("Simulated error");
+    });
+  
+    await searchStocks(req, res);
+  
+    expect(res.status).toHaveBeenCalledWith(500);
+  expect(res.json).toHaveBeenCalledWith({ error: "Failed to search stocks" });
+});
+});
+
+  it("should return cached search results", async () => {
+    const cachedData = {
+      results: [{ symbol: "AAPL", name: "Apple Inc." }],
+    };
+
+    jest.spyOn(cacheService, "getCache").mockReturnValue(cachedData);
+
     const req = {
       query: { q: "apple" },
     } as unknown as Request;
@@ -454,16 +614,49 @@ describe("searchStocks", () => {
       json: jest.fn(),
     } as unknown as Response;
 
-    jest.spyOn(Array.prototype, "filter").mockImplementationOnce(() => {
-      throw new Error("Simulated error");
-    });
-
     await searchStocks(req, res);
 
-    expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith({ error: "Failed to search stocks" });
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
+      ...cachedData,
+      source: "CACHE",
+    });
   });
-});
+
+  it("should handle non-string query by defaulting to empty string", async () => {
+    jest.spyOn(cacheService, "getCache").mockReturnValue(undefined);
+  
+    const mockDocs = [
+      {
+        data: () => ({ symbol: "AAPL", name: "Apple Inc." }),
+      },
+    ];
+  
+    const mockGet = jest.fn().mockResolvedValue({ docs: mockDocs });
+    const mockCollection = jest.fn(() => ({ get: mockGet }));
+  
+    jest.spyOn(admin, "firestore").mockReturnValue({
+      collection: mockCollection,
+    } as unknown as FirebaseFirestore.Firestore);
+  
+    const req = {
+      query: { q: 12345 }, // q is not a string
+    } as unknown as Request;
+  
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    } as unknown as Response;
+  
+    await searchStocks(req, res);
+  
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
+      results: [{ symbol: "AAPL", name: "Apple Inc." }],
+      source: "FIRESTORE",
+    });
+  });
+  
 
 
 // --- getStockSentiment Tests ---
@@ -475,26 +668,32 @@ describe("getStockSentiment", () => {
   /**
    * Test case: Should return sentiment analysis.
    */
-  it("should return sentiment data", async () => {
-    mockFirestoreSentimentSuccess();
+  it("should return cached sentiment data", async () => {
+    const cachedSentiment = {
+      symbol: "AAPL",
+      sentimentScore: 0.72,
+      sentiment: "Positive",
+      summary: "Apple is performing well in the market.",
+    };
+  
+    jest
+      .spyOn(cacheService, "getCache")
+      .mockReturnValue(cachedSentiment);
+  
     const req = createRequest({ symbol: "AAPL" });
-
     const res = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
     } as unknown as Response;
-
+  
     await getStockSentiment(req, res);
-
+  
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({
-      symbol: "AAPL",
-      sentimentScore: expect.any(Number),
-      sentiment: expect.any(String),
-      summary: expect.any(String),
-      source: expect.stringMatching(/(CACHE|FIRESTORE)/),
+      ...cachedSentiment,
+      source: "CACHE",
     });
-  });
+  })  
 
   /**
    * Test case: Should handle sentiment analysis error.
@@ -519,6 +718,43 @@ describe("getStockSentiment", () => {
   });
 });
 
+  it("should return 404 if sentiment not found", async () => {
+    clearCache("stock_sentiment_aapl");
+
+    const mockDoc = {
+      exists: false,
+    };
+
+    const mockGet = jest.fn().mockResolvedValue(mockDoc);
+
+    const mockDocRef = jest.fn(() => ({
+      get: mockGet,
+    }));
+
+    const mockCollection = jest.fn(() => ({
+      doc: jest.fn(() => ({
+        collection: jest.fn(() => ({
+          doc: mockDocRef,
+        })),
+      })),
+    }));
+
+    jest.spyOn(admin, "firestore").mockReturnValue({
+      collection: mockCollection,
+    } as unknown as FirebaseFirestore.Firestore);
+
+    const req = createRequest({ symbol: "AAPL" });
+
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    } as unknown as Response;
+
+    await getStockSentiment(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.json).toHaveBeenCalledWith({ error: "Sentiment not found" });
+  });
 
 // --- setStockAlert Tests ---
 describe("setStockAlert", () => {

@@ -105,6 +105,33 @@ describe("Auth Controller", () => {
     });
   });
 
+    it("should handle unknown error type during registration", async () => {
+      const req = {
+        body: {
+          email: "test@example.com",
+          password: "password123",
+        },
+      } as Request;
+    
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      } as unknown as Response;
+    
+      const mockCreateUser = admin.auth().createUser as jest.Mock;
+      mockCreateUser.mockImplementation(() => {
+        throw "Non-error thrown";
+      });
+    
+      await registerUser(req, res);
+    
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
+        message: "Registration failed",
+        error: "Unknown error",
+      });
+    });
+  
   // --- loginUser Tests ---
   describe("loginUser", () => {
     /**
@@ -169,6 +196,33 @@ describe("Auth Controller", () => {
     });
   });
 });
+    it("should handle unknown error type during login", async () => {
+      const req = {
+        body: {
+          email: "test@example.com",
+          password: "password123",
+        },
+      } as Request;
+
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      } as unknown as Response;
+
+      const mockAxiosPost = axios.post as jest.Mock;
+      mockAxiosPost.mockImplementation(() => {
+        throw "Unexpected error format"; 
+      });
+
+  await loginUser(req, res);
+
+  expect(res.status).toHaveBeenCalledWith(401);
+  expect(res.json).toHaveBeenCalledWith({
+    message: "Invalid credentials",
+    error: "Unknown error",
+  });
+});
+
 
   // --- setUserRole Tests ---
   describe("setUserRole", () => {
@@ -222,6 +276,33 @@ describe("Auth Controller", () => {
     });
   });
 
+    it("should handle unknown error type when setting user role", async () => {
+      const req = {
+        body: {
+          uid: "mock-uid",
+          role: "admin",
+        },
+      } as Request;
+    
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      } as unknown as Response;
+    
+      const mockSetCustomUserClaims = admin.auth().setCustomUserClaims as jest.Mock;
+      mockSetCustomUserClaims.mockImplementation(() => {
+        throw "Custom claim error"; // NOT an instance of Error
+      });
+    
+      await setUserRole(req, res);
+    
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
+        message: "Failed to set user role",
+        error: "Unknown error",
+      });
+    });
+
   // --- listUsers Tests ---
   describe("listUsers", () => {
     it("should list users successfully", async () => {
@@ -269,6 +350,59 @@ describe("Auth Controller", () => {
       });
     });
   });
+
+    it("should handle unknown error type when listing users", async () => {
+      const req = {} as Request;
+    
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      } as unknown as Response;
+    
+      const mockListUsers = admin.auth().listUsers as jest.Mock;
+      mockListUsers.mockImplementation(() => {
+        throw "Non-Error failure";
+      });
+    
+      await listUsers(req, res);
+    
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
+        message: "Failed to list users",
+        error: "Unknown error",
+      });
+    });
+
+    it("should default customClaims to {} if undefined", async () => {
+      const req = {} as Request;
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      } as unknown as Response;
+    
+      const mockListUsers = admin.auth().listUsers as jest.Mock;
+      mockListUsers.mockResolvedValue({
+        users: [
+          { uid: "no-claims", email: "no@claims.com", displayName: "No Claims", customClaims: undefined },
+        ],
+      });
+    
+      await listUsers(req, res);
+    
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({
+        users: [
+          {
+            uid: "no-claims",
+            email: "no@claims.com",
+            displayName: "No Claims",
+            customClaims: {},
+          },
+        ],
+      });
+    });
+    
+  
 
   // --- getUserById Tests ---
   describe("getUserById", () => {
@@ -327,6 +461,60 @@ describe("Auth Controller", () => {
       });
     });
   });
+
+    it("should handle unknown error type when retrieving user", async () => {
+      const req = {
+        params: {
+          id: "mock-uid",
+        },
+      } as unknown as Request;
+    
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      } as unknown as Response;
+    
+      const mockGetUser = admin.auth().getUser as jest.Mock;
+      mockGetUser.mockRejectedValue("Non-Error rejection");
+    
+      await getUserById(req, res);
+    
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.json).toHaveBeenCalledWith({
+        message: "User not found",
+        error: "Unknown error",
+      });
+    });
+
+    it("should default customClaims to {} if undefined", async () => {
+      const req = {
+        params: { id: "mock-uid" },
+      } as unknown as Request;
+    
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      } as unknown as Response;
+    
+      const mockGetUser = admin.auth().getUser as jest.Mock;
+      mockGetUser.mockResolvedValue({
+        uid: "mock-uid",
+        email: "test@example.com",
+        displayName: "Test User",
+        customClaims: undefined,
+      });
+    
+      await getUserById(req, res);
+    
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({
+        uid: "mock-uid",
+        email: "test@example.com",
+        displayName: "Test User",
+        customClaims: {}, // fallback confirmed
+      });
+    });
+    
   
 describe("Auth Routes (Integration Tests)", () => {
   beforeEach(() => {
